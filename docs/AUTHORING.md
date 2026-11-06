@@ -20,7 +20,7 @@ export function create(opts = {}) {
 
 `step(dt)` takes finite, nonnegative seconds and throws for invalid input. `t` is
 read-only. `draw` clears and redraws the complete framebuffer without advancing
-time. Updating `instance.params` affects the next draw. All 53 FX support this
+time. Updating `instance.params` affects the next draw. All 100 FX support this
 interface. The 51 new FX and happy-squint also export pure `draw(fb, t, opts)`;
 pure rendering supports deterministic out-of-order seeking and exact two-second
 loop wrap. Curious blink retains its original create/step/draw interface.
@@ -50,7 +50,7 @@ or inflate the catalog count.
 Register the module in `src/fx/index.js`; `effects`, `catalog` and `categories`
 are browser-safe and immutable. Gallery picker, category tabs, cards, CLI checks
 and catalog sheets derive entries from this registry. The current inventory is
-25 eyes, 8 weather, 8 system, 6 pomodoro, 6 transitions = 53 effects. Update the
+25 eyes, 18 weather, 22 system, 20 pomodoro, 15 transitions = 100 effects. Update the
 README counts, gallery intro and inventory expectation when expanding it.
 
 `src/core/draw.js` offers `defineEffect(id, name, paint, options)` for pure FX.
@@ -143,7 +143,7 @@ Sampling defaults to 32 frames at 16 fps (two seconds); when changing fps, set
 `--frames` to duration×fps to retain the full loop. CLI IDs may be positional
 or `--fx id`; `--look-x`, `--look-y`, `--blink` fix parameters.
 
-`check.mjs` exits nonzero on a failed check. Without an ID it checks all 53 FX.
+`check.mjs` exits nonzero on a failed check. Without an ID it checks all 100 FX.
 The domain checks are:
 
 - CHK-01: prohibit `Math.random`/`Date.now`, compare two full-sequence SHA-256

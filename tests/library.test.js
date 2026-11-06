@@ -14,14 +14,14 @@ test('every category module is registered exactly once, with immutable public me
     counts[category] = files.length;
     for (const file of files) assert.ok(Object.hasOwn(effects, `${category}/${file.slice(0, -3)}`));
   }
-  assert.deepEqual(counts, {"eyes":25,"weather":11,"system":13,"pomodoro":11,"transitions":12});
-  assert.equal(catalog.length, 72);
+  assert.deepEqual(counts, {"eyes":25,"weather":18,"system":22,"pomodoro":20,"transitions":15});
+  assert.equal(catalog.length, 100);
   assert.ok(Object.isFrozen(catalog) && Object.isFrozen(effects));
   assert.ok(catalog.every(meta => Object.isFrozen(meta)));
 });
 
 for (const profile of ['ssd1306-128x64', 'ssd1306-128x32']) {
-  test(`all 72 FX pass check (determinism, shimmer, budgets, actual header roundtrip): ${profile}`, async () => {
+  test(`all 100 FX pass check (determinism, shimmer, budgets, actual header roundtrip): ${profile}`, async () => {
     for (const fx of Object.keys(effects)) {
       const result = await checkSequence(() => sampleEffect({ fx, profile }));
       assert.equal(result.pass, true, JSON.stringify({ profile, ...result }));

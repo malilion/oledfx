@@ -54,13 +54,13 @@ export function paintWeather(style, d, p, opts) {
   }
 
   if (style === 'drizzle') {
-    cloud(d, 64 + wave * 2, 16);
-    for (let i = 0; i < 9; i++) { const x = 34 + i * 7, y = 34 + ((p * 18 + i * 5) % 18); d.rect(x, y, 1, 3); }
-    d.line(34, 56, 94, 56, 1);
+    cloud(d, 64 + wave * 2, 22);
+    for (let i = 0; i < 8; i++) { const x = 36 + i * 8, y = 38 + ((Math.floor(p * 12) + i * 3) % 12); d.rect(x, y, 2, 4); }
+    d.line(34, 56, 94, 56, 2);
   }
   if (style === 'hail') {
-    cloud(d, 64, 15);
-    for (let i = 0; i < 8; i++) { const x = 34 + i * 8 + Math.sin(p * TAU + i) * 2, y = 32 + ((p * 22 + i * 4) % 20); d.circle(x, y, 2); }
+    cloud(d, 64, 22 + Math.sin(p * TAU) * 1.5);
+    for (let i = 0; i < 7; i++) { const x = 34 + i * 10, y = 38 + ((Math.floor(p * 12) + i * 2) % 12); d.circle(x, y, 2); }
   }
   if (style === 'sandstorm') {
     for (let i = 0; i < 5; i++) { const y = 14 + i * 9, x = 18 + Math.sin(p * TAU + i) * 14; d.line(x, y, x + 60, y + 2); }
@@ -75,17 +75,41 @@ export function paintWeather(style, d, p, opts) {
     for (let i = 0; i < 6; i++) { const w = 8 + i * 6, y = 10 + i * 8; d.round(64 - w / 2 + Math.sin(p * TAU + i) * 4, y, w, 5, 2); }
   }
   if (style === 'sunrise') {
-    d.rect(8, 42, 112, 16); for (let i = 0; i < 5; i++) d.line(16 + i * 22, 42, 16 + i * 22, 54);
-    sun(d, 64, 42 - p * 16, p, 10);
+    d.round(18, 42, 92, 12, 2);
+    for (let i = 0; i < 4; i++) d.rect(30 + i * 20, 42, 2, 8);
+    const rise = (1 - Math.cos(p * TAU)) / 2;
+    sun(d, 64, 36 - rise * 12, 0.2, 8);
   }
   if (style === 'starry') {
-    const rand = mulberry32(opts.seed ?? 1);
-    for (let i = 0; i < 18; i++) {
-      const x = 8 + rand() * 112, y = 8 + rand() * 40;
-      const twinkle = ((Math.floor(p * 12) + i) % 4) !== 0;
-      if (twinkle) { d.rect(x - 1, y, 3, 1); d.rect(x, y - 1, 1, 3); }
+    const stars = [[22, 14], [38, 24], [54, 12], [74, 22], [108, 16], [30, 38], [50, 44], [86, 36], [112, 42], [68, 48]];
+    const tick = Math.floor(p * 10);
+    for (let i = 0; i < stars.length; i++) {
+      if ((tick + i) % 5 === 0) continue;
+      const [x, y] = stars[i];
+      d.rect(x, y, 3, 2); d.rect(x + 1, y - 1, 2, 4);
     }
-    d.circle(96, 18, 7); d.circle(100 + wave, 15, 6, 0);
+    d.circle(96, 20, 8); d.circle(102 + wave * 2, 17, 7, 0);
+  }
+  if (style === 'aurora') {
+    for (let i = 0; i < 3; i++) d.round(24 + Math.sin(p * TAU + i * 1.4) * 8, 16 + i * 10, 62, 4, 1);
+    const tick = Math.floor(p * 8);
+    for (let i = 0; i < 5; i++) if ((tick + i) % 3 !== 0) d.rect(26 + i * 16, 50, 3, 3);
+  }
+  if (style === 'frost') {
+    d.round(24, 12, 80, 40, 3); d.round(28, 16, 72, 32, 2, 0);
+    const n = Math.floor(p * 8);
+    for (const [i, [x, y]] of [[40, 28], [56, 24], [74, 30], [46, 40], [66, 38], [84, 36]].entries()) {
+      const s = 3 + ((n + i) % 4) * 2;
+      d.rect(x, y, s, 2); d.rect(x + 1, y - s / 2, 2, s);
+    }
+    d.line(34 + Math.sin(p * TAU) * 6, 34, 78 + Math.sin(p * TAU) * 6, 34, 2);
+  }
+  if (style === 'comet') {
+    d.round(20, 50, 88, 6, 2);
+    for (let i = 0; i < 4; i++) d.rect(26 + i * 18, 16 + (i % 2) * 10, 3, 3);
+    const x = 40 + p * 48, y = 26 + Math.sin(p * TAU) * 4;
+    d.circle(x, y, 3);
+    for (let i = 1; i <= 3; i++) d.rect(x - i * 6, y + 1, 4, 2);
   }
   if (style === 'moon') {
     d.circle(61, 30, 20); d.circle(70 + wave * 2, 23, 18, 0);
@@ -150,26 +174,34 @@ export function paintSystem(style, d, p, opts) {
   }
   if (style === 'unlock') {
     d.round(46, 30, 36, 26, 4); d.round(50, 34, 28, 18, 3, 0);
-    d.arc(78 + pulse * 4, 18 - pulse * 8, 14, Math.PI, TAU, 3); d.rect(61, 40, 6, 8);
+    d.arc(74, 24 - pulse * 6, 11, Math.PI, TAU, 3);
+    d.rect(60, 40, 8, 8); d.circle(64, 43, 2, 0);
   }
   if (style === 'mic') {
-    d.round(56, 10, 16, 28, 8); d.arc(64, 38, 16, 0, Math.PI, 3); d.rect(62, 38, 4, 14); d.rect(52, 52, 24, 4);
-    const rings = 1 + Math.floor(pulse * 3);
-    for (let i = 0; i < rings; i++) d.arc(64, 24, 18 + i * 6, -0.9, 0.9);
+    const bob = Math.sin(p * TAU) * 2;
+    d.round(56, 12 + bob, 16, 26, 8);
+    d.arc(64, 40, 14, 0.15, Math.PI - 0.15, 3); d.rect(62, 40, 4, 10); d.rect(50, 52, 28, 3);
+    const rings = 1 + Math.floor(pulse * 2);
+    for (let i = 0; i < rings; i++) d.arc(64, 26, 18 + i * 6, -0.6, 0.6, 2);
   }
   if (style === 'speaker') {
-    d.polygon([[40, 24], [56, 24], [70, 12], [70, 52], [56, 40], [40, 40]]);
-    const rings = 1 + Math.floor(pulse * 3);
-    for (let i = 0; i < rings; i++) d.arc(74, 32, 10 + i * 6, -0.9, 0.9);
+    const shake = Math.sin(p * TAU * 2) * 2;
+    d.polygon([[40 + shake, 24], [54 + shake, 24], [68 + shake, 14], [68 + shake, 50], [54 + shake, 40], [40 + shake, 40]]);
+    const rings = 1 + Math.floor(pulse * 2);
+    for (let i = 0; i < rings; i++) d.arc(74, 32, 10 + i * 6, -0.7, 0.7, 2);
   }
   if (style === 'gps') {
-    const r = 16 + pulse * 4;
+    const r = 16 + Math.round(pulse * 2) * 2;
     d.circle(64, 28, r); d.circle(64, 28, 8, 0); d.circle(64, 28, 4);
-    d.line(64, 12, 64, 44); d.line(48, 28, 80, 28); d.polygon([[64, 46], [56, 58], [72, 58]]);
+    d.line(64, 14, 64, 42); d.line(50, 28, 78, 28);
+    const a = p * TAU;
+    d.circle(64 + Math.cos(a) * 11, 28 + Math.sin(a) * 11, 2, 0);
+    d.polygon([[64, 46], [56, 56], [72, 56]]);
   }
   if (style === 'usb') {
-    d.round(52, 8, 24, 36, 3); d.rect(58, 44, 12, 12); d.rect(56, 14, 6, 8, 0); d.rect(66, 14, 6, 8, 0);
-    d.circle(64, 34, 3 + pulse * 3);
+    d.round(50, 10, 28, 34, 3); d.round(54, 14, 20, 22, 2, 0); d.rect(58, 44, 12, 10);
+    d.rect(60, 16, 2, 8); d.circle(66, 18, 2); d.rect(70, 16, 2, 6);
+    d.rect(58, 26 + Math.sin(p * TAU) * 6, 12, 3);
   }
   if (style === 'sdcard') {
     d.polygon([[44, 10], [78, 10], [84, 18], [84, 54], [44, 54]]); d.rect(48, 14, 28, 8, 0);
@@ -180,14 +212,31 @@ export function paintSystem(style, d, p, opts) {
     d.circle(64, 32, 6); for (let i = 0; i < 3; i++) { const a = p * TAU + i * TAU / 3; d.polygon([[64, 32], [64 + Math.cos(a) * 22, 32 + Math.sin(a) * 22], [64 + Math.cos(a + 0.5) * 10, 32 + Math.sin(a + 0.5) * 10]]); }
   }
   if (style === 'memory') {
-    d.round(24, 18, 80, 30, 3);
-    const filled = Math.floor(p * 8);
-    for (let i = 0; i < 8; i++) d.rect(30 + i * 9, 24, 6, 18 * (i <= filled ? 1 : 0.25));
+    d.round(22, 16, 84, 32, 3); d.round(26, 20, 76, 24, 2, 0);
+    const filled = Math.floor(p * 9);
+    for (let i = 0; i < 8; i++) d.rect(30 + i * 9, 24, 6, i < filled ? 16 : 5);
+    d.rect(30 + ((p * 8) % 1) * 64, 22, 2, 20);
   }
   if (style === 'alert') {
-    d.polygon([[64, 10], [28, 52], [100, 52]]); d.polygon([[64, 18], [38, 48], [90, 48]], 0);
-    d.rect(61, 26, 6, 14); d.circle(64, 46, 3);
-    if ((Math.floor(p * 8) % 2) === 0) d.circle(64, 32, 26);
+    d.polygon([[64, 12], [32, 50], [96, 50]]); d.polygon([[64, 22], [42, 46], [86, 46]], 0);
+    const bob = Math.sin(p * TAU) * 3;
+    d.rect(62, 30 + bob, 4, 8); d.circle(64, 43, 2);
+    d.rect(36 + p * 48, 53, 6, 3);
+  }
+  if (style === 'bell') {
+    const sway = Math.sin(p * TAU) * 4;
+    d.polygon([[64 + sway, 14], [50 + sway, 34], [78 + sway, 34]]);
+    d.round(48 + sway, 32, 32, 8, 3); d.rect(62 + sway, 38, 4, 6);
+    d.circle(64 + sway * 1.3, 48, 3);
+    if (pulse > 0.55) d.arc(64, 28, 24, -2.5, -1.9, 2);
+    if (pulse > 0.75) d.arc(64, 28, 24, -1.2, -0.6, 2);
+  }
+  if (style === 'download') {
+    d.round(38, 40, 52, 14, 3); d.round(42, 44, 44, 6, 2, 0);
+    const travel = Math.round((1 - Math.cos(p * TAU)) / 2 * 10);
+    d.rect(44, 45, 6 + travel * 3, 4);
+    const y = 16 + (1 - Math.cos(p * TAU)) / 2 * 14;
+    d.polygon([[64, y + 8], [56, y], [61, y], [61, y - 4], [67, y - 4], [67, y], [72, y]]);
   }
   if (style === 'heartbeat') {
     d.line(18, 33, 110, 33);
@@ -236,10 +285,10 @@ export function paintDesk(style, d, p, opts) {
     for (let i = 0; i < 3; i++) for (let y = 10; y < 26; y++) d.rect(50 + i * 9 + 2 * Math.sin(y / 4 + p * TAU + i), y, 2, 2);
   }
   if (style === 'notebook') {
-    d.round(30, 10, 68, 46, 2); d.rect(40, 10, 4, 46);
-    for (let i = 0; i < 5; i++) d.line(48, 18 + i * 7, 88, 18 + i * 7);
-    const row = Math.floor(p * 5) % 5;
-    d.line(48, 18 + row * 7, 60 + ((p * 5) % 1) * 28, 18 + row * 7, 3);
+    d.round(28, 12, 72, 42, 2); d.rect(36, 12, 4, 42); d.round(42, 16, 52, 34, 1, 0);
+    for (let i = 0; i < 4; i++) d.line(48, 22 + i * 8, 88, 22 + i * 8);
+    const row = Math.floor(p * 4) % 4;
+    d.line(48, 22 + row * 8, 48 + (p * 4 % 1) * 34, 22 + row * 8, 3);
   }
   if (style === 'stretch') {
     d.circle(64, 14, 6); d.line(64, 20, 64, 38, 3); d.line(64, 26, 48 - pulse * 8, 34, 3); d.line(64, 26, 80 + pulse * 8, 34, 3);
@@ -250,9 +299,10 @@ export function paintDesk(style, d, p, opts) {
     for (let i = 0; i < 4; i++) { const a = -1.2 + i * 0.7 + wave * 0.2; d.circle(64 + Math.cos(a) * 14, 28 + Math.sin(a) * 8, 6); }
   }
   if (style === 'candle') {
-    d.rect(58, 28, 12, 28); d.round(56, 26, 16, 6, 3);
-    const flicker = 10 + pulse * 6 + Math.sin(p * TAU * 3) * 2;
-    d.polygon([[64, flicker], [58, 24], [70, 24]]); d.circle(64, flicker + 4, 2);
+    d.rect(58, 28, 12, 26); d.round(56, 26, 16, 6, 3);
+    const flicker = 14 + Math.sin(p * TAU * 2) * 4;
+    d.polygon([[64, flicker], [56, 26], [72, 26]]); d.circle(64, flicker + 3, 2);
+    d.rect(76 + Math.sin(p * TAU) * 8, 16, 3, 3);
   }
   if (style === 'tomato') {
     d.circle(64, 34, 18); d.circle(64, 34, 12, 0); d.polygon([[64, 12], [56, 22], [72, 22]]);
@@ -260,19 +310,20 @@ export function paintDesk(style, d, p, opts) {
     digit(d, n, 56, 26, 0.7);
   }
   if (style === 'nap') {
-    d.round(40, 34, 48, 16, 8); d.circle(50, 28, 10); d.circle(76, 28, 10);
-    d.line(44, 26, 56, 26, 2); d.line(70, 26, 82, 26, 2);
-    const phase = Math.floor(p * 6) % 3;
-    if (phase >= 0) d.rect(90, 14, 6, 2);
-    if (phase >= 1) d.rect(96, 8, 10, 2);
-    if (phase >= 2) d.rect(104, 4, 8, 2);
+    d.circle(48, 30, 9); d.circle(76, 30, 9);
+    d.rect(42, 28, 12, 3, 0); d.rect(70, 28, 12, 3, 0);
+    d.round(38, 36, 52, 14, 6);
+    const z = (p * 2) % 1;
+    d.rect(90, 24 - z * 10, 8, 2); d.rect(98, 18 - z * 8, 10, 2);
   }
   if (style === 'checklist') {
-    const done = Math.floor(p * 4);
+    const step = p * 4, done = Math.floor(step), partial = step % 1;
     for (let i = 0; i < 4; i++) {
-      d.round(28, 10 + i * 13, 14, 10, 2);
-      if (i < done) { d.line(31, 15 + i * 13, 35, 19 + i * 13, 2); d.line(35, 19 + i * 13, 40, 12 + i * 13, 2); }
-      d.line(50, 15 + i * 13, 100, 15 + i * 13);
+      const y = 12 + i * 12;
+      d.round(26, y, 16, 12, 2); d.round(28, y + 2, 12, 8, 1, 0);
+      if (i < done) { d.line(31, y + 6, 34, y + 8, 2); d.line(34, y + 8, 38, y + 4, 2); }
+      else if (i === done) d.line(31, y + 6, 31 + partial * 7, y + 6 + partial * 2, 2);
+      d.line(50, y + 5, 98, y + 5);
     }
   }
   if (style === 'timer-beep') {
@@ -280,9 +331,38 @@ export function paintDesk(style, d, p, opts) {
     if (pulse > 0.55) { d.arc(64, 32, 28, -0.4, 0.4); d.arc(64, 32, 28, Math.PI - 0.4, Math.PI + 0.4); }
   }
   if (style === 'desk-lamp') {
-    d.rect(58, 50, 12, 8); d.line(64, 50, 64, 28, 3); d.line(64, 28, 88, 18, 3); d.polygon([[88, 12], [104, 22], [84, 28]]);
-    const beams = 1 + Math.floor(pulse * 4);
-    for (let i = 0; i < beams; i++) d.line(96, 24, 108, 36 + i * 5);
+    d.rect(56, 50, 16, 6); d.line(64, 50, 64, 30, 3); d.line(64, 30, 86, 20, 3);
+    d.polygon([[84, 14], [102, 22], [80, 26]]);
+    for (let i = 0; i < 3; i++) {
+      const a = 0.45 + i * 0.28 + Math.sin(p * TAU) * 0.1;
+      d.line(92, 24, 92 + Math.cos(a) * 14, 24 + Math.sin(a) * 14, 2);
+    }
+  }
+  if (style === 'water') {
+    d.round(48, 12, 32, 42, 4); d.round(52, 16, 24, 34, 3, 0);
+    const level = 40 - Math.floor(p * 8) * 2;
+    d.rect(54, level, 20, 46 - level);
+    d.circle(58 + Math.sin(p * TAU) * 5, 43, 2, 0);
+  }
+  if (style === 'breathe') {
+    const r = 10 + Math.round((1 - Math.cos(p * TAU)) * 3);
+    d.circle(64, 36, r); d.circle(64, 36, Math.max(3, r - 5), 0);
+    const a = p * TAU - Math.PI / 2;
+    d.circle(64 + Math.cos(a) * (r + 5), 36 + Math.sin(a) * (r + 5), 2);
+  }
+  if (style === 'pencil') {
+    d.round(26, 16, 64, 36, 2); d.round(32, 20, 52, 28, 1, 0);
+    for (let i = 0; i < 3; i++) d.line(38, 26 + i * 8, 78, 26 + i * 8);
+    const row = Math.floor(p * 3) % 3, x = 38 + (p * 3 % 1) * 34;
+    d.line(38, 26 + row * 8, x, 26 + row * 8, 3);
+    d.polygon([[x, 20 + row * 8], [x + 14, 14 + row * 8], [x + 6, 26 + row * 8]]);
+  }
+  if (style === 'letter') {
+    d.polygon([[36, 18], [92, 18], [92, 50], [36, 50]]);
+    d.polygon([[40, 22], [88, 22], [88, 46], [40, 46]], 0);
+    const flap = 26 + Math.sin(p * TAU) * 6;
+    d.line(40, 22, 64, flap, 2); d.line(88, 22, 64, flap, 2);
+    d.rect(58, 32, 12, 8);
   }
   if (style === 'focus-ring') {
     d.arc(64, 32, 23, -Math.PI / 2, -Math.PI / 2 + TAU, 2);
@@ -318,7 +398,7 @@ export function paintTransition(style, d, p, opts, fb) {
     for (let i = 0; i < 40 * progress; i++) { const a = i * 0.35, r = i * 0.9; d.rect(64 + Math.cos(a) * r, 32 + Math.sin(a) * r, 3, 3); }
   }
   if (style === 'checker') {
-    const rows = Math.max(1, Math.round(progress * 8));
+    const rows = Math.round(progress * 8);
     for (let y = 0; y < rows * 8 && y < fb.height; y += 8) for (let x = 0; x < fb.width; x += 8) {
       if (((x + y) / 8) % 2 === 0) fb.fillRect(x, y, 8, 8);
     }
@@ -327,13 +407,13 @@ export function paintTransition(style, d, p, opts, fb) {
     for (let i = 0; i < 8; i++) fb.fillRect(0, i * 8, Math.ceil(fb.width * Math.min(1, progress * 1.4 - i * 0.05)), 8);
   }
   if (style === 'circle-out') {
-    const r = 6 + Math.round(progress * 12) * 3;
-    d.arc(64, 32, r, 0, Math.PI * 2, 2);
+    // Coarse radius steps keep the interior stable so XOR only stores the ring.
+    const r = 4 + Math.round(progress * 8) * 4;
+    d.circle(64, 32, r);
   }
   if (style === 'diamond') {
-    const r = 4 + Math.round(progress * 20) * 2;
-    d.line(64, 32 - r, 64 + r, 32, 2); d.line(64 + r, 32, 64, 32 + r, 2);
-    d.line(64, 32 + r, 64 - r, 32, 2); d.line(64 - r, 32, 64, 32 - r, 2);
+    const r = 4 + Math.round(progress * 8) * 4;
+    d.polygon([[64, 32 - r], [64 + r, 32], [64, 32 + r], [64 - r, 32]]);
   }
   if (style === 'scramble') {
     const rand = mulberry32(opts.seed ?? 1);

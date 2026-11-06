@@ -6,7 +6,7 @@ import { effects, categories } from '../src/fx/index.js';
 import { createFramebuffer } from '../src/core/framebuffer.js';
 import { renderRGBA } from '../src/core/render-rgba.js';
 
-test('gallery catalog filters all 72 FX, paints only visible cards and selects a preview', async () => {
+test('gallery catalog filters all 100 FX, paints only visible cards and selects a preview', async () => {
   let nextFrame, observerCallback, draws = 0, selected = 0, scrolled = 0;
   function element() {
     const handlers = new Map();
@@ -32,13 +32,13 @@ test('gallery catalog filters all 72 FX, paints only visible cards and selects a
     requestAnimationFrame(callback) { nextFrame = callback; }
   });
   const cards = nodes['#catalog'].children;
-  assert.equal(cards.length, 72);
+  assert.equal(cards.length, 100);
   assert.equal(nodes['#categories'].children.length, 6);
   nextFrame(0); assert.equal(draws, 0);
   observerCallback([{ target: cards[0], isIntersecting: true }, { target: cards[25], isIntersecting: true }]);
   nextFrame(16); assert.equal(draws, 2);
   nodes['#categories'].children[2].dispatchEvent({ type: 'click' });
-  assert.equal(cards.filter(card => !card.hidden).length, 11);
+  assert.equal(cards.filter(card => !card.hidden).length, 18);
   nextFrame(32); assert.equal(draws, 3);
   nodes['#search'].value = 'thunderstorm'; nodes['#search'].dispatchEvent({ type: 'input' });
   assert.equal(cards.filter(card => !card.hidden).length, 1);

@@ -1,6 +1,6 @@
 # oledfx
 
-**72 procedural OLED animations. Zero runtime dependencies. One bit of personality.**
+**100 procedural OLED animations. Zero runtime dependencies. One bit of personality.**
 
 小螢幕，有表情。Give a desktop robot a curious glance, a weather station a little rain, or a focus timer a steaming coffee. Preview and tune a real 1-bit framebuffer in the browser, then export a C header for your microcontroller. Pure ESM, deterministic animation, no image assets or npm install needed.
 
@@ -9,11 +9,11 @@
 | Category | FX | Included |
 | --- | ---: | --- |
 | Eyes | **25** | Blink, happy squint, curious tilt, sleepy, hearts, stars, surprised, charging, angry, dizzy, glitch, wink, sad, crying, sleeping, shy, suspicious, excited, determined, listening, searching, robot, sparkle, deadpan, loading |
-| Weather | **8** | Sun, cloudy, rain with splashes, thunderstorm, snow, fog, wind, moon |
-| System & IoT | **8** | Wi-Fi, Bluetooth, OTA, battery, CPU waveform, thermometer, humidity, heartbeat |
-| Pomodoro & desk | **6** | Hourglass, coffee, campfire, flip clock, fireworks, focus ring |
-| Transitions | **6** | CRT shutdown, blinds, seeded dissolve, radar, wipe, iris |
-| **Total** | **72** | All registered in the runtime index and gallery |
+| Weather | **18** | Sun, cloudy, rain, thunderstorm, snow, fog, wind, moon, rainbow, sandstorm, tornado, drizzle, hail, sunrise, starry night, aurora, frost, comet |
+| System & IoT | **22** | Wi-Fi, Bluetooth, OTA, battery, CPU, thermometer, humidity, heartbeat, signal, sync, lock, SD card, fan, unlock, microphone, speaker, GPS, USB, memory, alert, bell, download |
+| Pomodoro & desk | **20** | Hourglass, coffee, campfire, flip clock, fireworks, focus ring, tea, stretch, plant, tomato, timer, notebook, candle, nap, checklist, desk lamp, water, breathe, pencil, letter |
+| Transitions | **15** | CRT, blinds, wipe, iris, radar, pixels, spiral, bars, scramble, fade, slide up, dissolve, checker, circle out, diamond |
+| **Total** | **100** | All registered in the runtime index and gallery |
 
 With Node.js 20+:
 
@@ -67,4 +67,4 @@ node tools/check.mjs weather/rain --profile ssd1306-128x32
 
 `npm test` checks both profiles, every FX's determinism and actual emitted-header roundtrip, shimmer and flash budgets, bitmap bit ordering, C playback across repeated loops, geometry/dithering, PNGs, and gallery interactions. [AUTHORING](docs/AUTHORING.md) documents the complete API, file layout, shared helpers, fixtures, export formats and visual review workflow.
 
-This release covers the SSD1306 software pipeline in [PRD 02](docs/PRD.md). The PRD's 100-FX catalog target, RGB565/HUB75/ST7789 renderers, physical board validation and launch video remain future work. PNG references in `docs/images/` are actual framebuffer renders; they are not browser screenshots.
+This release covers the SSD1306 software pipeline in [PRD 02](docs/PRD.md), including the 100-FX catalog. RGB565/HUB75/ST7789 renderers, physical board validation and launch video remain future work. PNG references in `docs/images/` are actual framebuffer renders; they are not browser screenshots.
