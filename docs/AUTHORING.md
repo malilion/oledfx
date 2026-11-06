@@ -1,103 +1,234 @@
-# 編寫 oledfx 動畫
+# Authoring oledfx
 
-每個動畫放在 `src/fx/<id>.js`，匯出 `meta`（id、name、duration、loop、width、height）與 `create(opts)`。實例提供唯讀 `t`、`step(dt)`、`draw(fb)`。`dt` 為秒；`draw` 清除並重繪 framebuffer，不推進時間。新增動畫後登錄 `src/fx/index.js`。
+The public runtime is `src/index.js`. Everything is native ESM with zero runtime
+packages; browser imports and Node tools share the framebuffer, FX registry,
+compositor, XOR-RLE codec and header compiler.
 
-`eyes/blink` 的 `lookX`／`lookY` 為 -1..1，`blink` 為 0..1（0 張眼、1 閉眼，省略或 null 為自動）；`eyes/happy-squint` 支援相同視線與眨眼參數。實例的 `params` 可在繪製前更新。特效幾何以原生 128×64 座標設計；在 128×32 profile 中以等比例縮小並置中。新路徑為 `src/fx/eyes/blink.js` 與 `src/fx/eyes/happy-squint.js`。舊的 `src/fx/eyes.js`／`src/fx/happy-squint.js` 及 CLI ID `eyes`／`happy-squint` 仍可使用；`Object.keys(effects)` 只列出新的 canonical ID。
+## Effect contract
 
-`eyes/happy-squint` 也匯出 pure API `draw(screen, t, opts)`：2 秒循環，在 0.15–0.35 秒快速眨眼，0.5–0.75 秒漸入笑眼、維持至 1.35 秒，再於 1.6 秒恢復。使用 `fillRoundRect(..., 1.0)` 畫白眼框、`fillCircle(..., 0.0)` 從下方挖出笑弧。`blink: 0` 明確覆寫自動眨眼；省略或 null 啟用自動曲線。
-
-## Framebuffer 與抖動
+Every canonical effect lives at `src/fx/<category>/<name>.js` and exports:
 
 ```js
-import { createFramebuffer, clear, fill, getPixel, setPixel } from '../src/core/framebuffer.js';
-import { dither } from '../src/core/dither.js';
-const fb = createFramebuffer('ssd1306-128x64'); // 也接受 (128, 64)
-fb.fillRoundRect(27, 18, 26, 28, 6, 1.0);
-fb.fillCircle(40, 45, 17, 0.0); // 黑色挖空
-fb.fillRect(4, 4, 8, 8, 1);
-fb.clearRect(5, 5, 6, 6);
-clear(fb);          // fill(fb) 全亮；fill(fb, 0) 全暗
-setPixel(fb, 7, 9); // getPixel(fb, 7, 9) === 1
-dither(fb, (x, y) => x / 127, 'bayer4x4');
+export const meta = Object.freeze({
+  id: 'weather/example', name: 'Example', duration: 2,
+  loop: true, width: 128, height: 64
+});
+export function create(opts = {}) {
+  // Return { params, get t(), step(dt), draw(framebuffer) }.
+}
 ```
 
-`fb = { width, height, data: Uint8Array }`，每 byte 表示同一 x 的 8 個垂直像素：`index = (y >> 3) * width + x`，`bit = y & 7`。預設共 1024 bytes。`createFramebuffer(profileId)` 使用 `src/core/profiles.js` 的 `getProfile(id)`；預設 `DEFAULT_PROFILE = 'ssd1306-128x64'`。未知 ID 會拋錯。Profiles 與各設定均為唯讀：
+`step(dt)` takes finite, nonnegative seconds and throws for invalid input. `t` is
+read-only. `draw` clears and redraws the complete framebuffer without advancing
+time. Updating `instance.params` affects the next draw. All 53 FX support this
+interface. The 51 new FX and happy-squint also export pure `draw(fb, t, opts)`;
+pure rendering supports deterministic out-of-order seeking and exact two-second
+loop wrap. Curious blink retains its original create/step/draw interface.
 
-| Profile ID | w | h | depth | pageBytes | frameBytes |
-| --- | --- | --- | --- | --- | --- |
-| `ssd1306-128x64` | 128 | 64 | 1 | 128 | 1024 |
+Eyes accept `lookX, lookY` in -1..1 and `blink` in 0..1. A missing or null blink
+selects automatic timing; explicit zero keeps the eyes open. Seeds must be stable;
+use `mulberry32(seed)` from `src/core/prng.js`. The checker forbids `Math.random`
+and `Date.now` and renders the sequence twice. Never use wall time or random
+state during drawing. System/desk icons are procedural illustrations, not actual
+sensor readers or clocks: supply live data from your application.
+
+`system/ota` and `pomodoro/focus-ring` accept `progress` in 0..1. All transition
+modules accept `progress`: wipe, blinds, dissolve and iris give empty/full masks
+at 0/1; CRT contracts at 1. Radar is a looping sweep and does not use progress.
+Without an override the masks use a two-second ping-pong preview, so both ends
+join smoothly. Flip-clock previews accelerated demo seconds; it does not read
+the system clock. Sensors and application state belong outside the renderer.
+
+`eyes/happy-squint` preserves the PRD PoC: blink at 0.15–0.35 seconds, smile
+ramp at 0.5–0.75, hold through 1.35, restore by 1.6. A black circle carves the
+smile from rounded white eye boxes. `src/fx/eyes.js`, `src/fx/happy-squint.js`
+and CLI IDs `eyes`, `happy-squint` remain legacy aliases; aliases do not enumerate
+or inflate the catalog count.
+
+## Add an FX
+
+Register the module in `src/fx/index.js`; `effects`, `catalog` and `categories`
+are browser-safe and immutable. Gallery picker, category tabs, cards, CLI checks
+and catalog sheets derive entries from this registry. The current inventory is
+25 eyes, 8 weather, 8 system, 6 pomodoro, 6 transitions = 53 effects. Update the
+README counts, gallery intro and inventory expectation when expanding it.
+
+`src/core/draw.js` offers `defineEffect(id, name, paint, options)` for pure FX.
+It supplies lifecycle validation, clear-before-draw, modulo time and a centered
+128×64 logical drawing space. `paint(drawing, phase, params, fb)` receives phase
+0..1 and scaled `rect`, `round`, `circle`, `line`, `arc` and `polygon` helpers.
+Use `{ eyes: true }` to expose gaze/blink defaults. The new packs share geometry
+in `src/fx/_shared/eyes.js` and `_shared/packs.js`; a single wrapper depends on
+those helpers and `core`, so copy that dependency closure when reusing a file.
+
+New effects deliberately sample on two-pixel cells. This keeps moving thin
+curves readable and eliminates isolated one-pixel changes on OLED hardware.
+The original two effects retain their original rasterization. At 128×32, icons
+are uniformly scaled and centered; keep details legible at this size. Full-screen
+masks use physical framebuffer coordinates so narrow profiles still fill the
+entire display. Non-transition content must stay off the outer border, including
+at all gaze extremes.
+
+After changing an FX:
+
+```sh
+node tools/check.mjs weather/rain
+node tools/check.mjs weather/rain --profile ssd1306-128x32
+node tools/render.mjs weather/rain --dual-tone --out artifacts/rain-contact.png
+node tools/render-catalog.mjs --category weather --out artifacts/weather.png
+npm test
+```
+
+Inspect the generated PNGs. Check silhouette, motion rhythm, tiny-screen
+legibility, gaze extremes, loop boundaries and cropped edges. Prefer broad,
+stable shapes over flickering noise. Contact sheets show frame numbers,
+three-decimal timestamps, fill rates and center crosshairs. Re-render and inspect
+after visual fixes. `--still-out file.png` writes the first raw simulated frame;
+`--scale`, `--columns`, `--samples` tune contact sheets. Catalog sheets accept
+`--category`, `--time`, `--profile`, `--columns`, `--scale`.
+
+## Framebuffer and drawing
+
+```js
+import {
+  createFramebuffer, clear, fill, getPixel, setPixel, fillRect
+} from '../src/index.js';
+const fb = createFramebuffer('ssd1306-128x64'); // also (128, 64)
+fb.fillRoundRect(27, 18, 26, 28, 6, 1);
+fb.fillCircle(40, 45, 17, 0); // carve black
+fb.fillRect(4, 4, 8, 8, 1).clearRect(5, 5, 6, 6);
+fillRect(fb, 10, 10, 4, 4); // standalone equivalent
+clear(fb); fill(fb); fill(fb, 0);
+setPixel(fb, 7, 9); // getPixel(fb, 7, 9) === 1
+```
+
+Data is `Uint8Array`, vertically page-packed: index `(y >> 3) * width + x`,
+bit `y & 7`. Width must be positive integer, height a positive multiple of 8.
+Out-of-bounds pixel writes are ignored; reads return zero. Pixel coordinates
+must be integers. All shape geometry must be finite. Nonpositive rectangle
+sizes draw nothing; negative radii throw. Shapes clip before iteration, so they
+never wrap rows or pages. Rectangles cover `[x,x+w) × [y,y+h)` using integer
+pixel centers. Circles include their boundary. Rounded corners clamp radius
+to `(min(w,h)-1)/2`. Radius-zero circles draw their center; rounded rectangles
+with radius zero are rectangles. Shapes and fill/clear return `fb` for chaining.
+
+Profiles are frozen and unknown IDs throw:
+
+| ID | Width | Height | Depth | Page bytes | Frame bytes |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `ssd1306-128x64` (default) | 128 | 64 | 1 | 128 | 1024 |
 | `ssd1306-128x32` | 128 | 32 | 1 | 128 | 512 |
 
-`pageBytes` 是一頁（8 列）的 byte 數。`createFramebuffer()`／`createFramebuffer(width, height)` 保留相容性。繪圖有兩種等價形式：`fb.fillRect(x, y, w, h, on)` 或從 framebuffer 模組匯入 `fillRect(fb, x, y, w, h, on)`。同樣提供 `fillCircle(cx, cy, radius, on)`、`fillRoundRect(x, y, w, h, radius, on)`、`clearRect(x, y, w, h)`，以及方法版 `clear`／`fill`／`setPixel`／`getPixel`。除 `getPixel` 外，shape 與 fill／clear 回傳 framebuffer，支援串接。值 0／0.0 清除、1／1.0 點亮；省略 `on` 為 1。
+`dither(fb, source, mode)` accepts row-major luminance or `(x,y)=>0..1`:
+threshold uses >=0.5; `bayer4x4` has 17 ordered levels via round(value×16);
+checker has 3 levels via round(value×2). Use spatially fixed patterns, never
+frame-dependent noise or temporal error diffusion.
 
-幾何以整數像素中心取樣，矩形涵蓋 `[x, x+w) × [y, y+h)`；小數邊界取範圍內的整數點，圓形含邊界。圓角半徑自動限制於 `(min(w,h)-1)/2`。所有圖形先裁切至螢幕，不會換列或跨頁溢出；寬／高 <=0 不繪製，負半徑與非有限座標拋出 RangeError。半徑 0 的圓在整數中心點亮一點，圓角半徑 0 等同矩形。
+`renderRGBA(fb, { scale, grid, glow, dualTone, split })` returns
+`{ width, height, data }`. Scale is integer 1..16. Yellow/blue split defaults to
+16 physical rows. Gallery switches narrow OLEDs to monochrome blue. This
+compositor is shared by the gallery and all PNG renders.
 
-核心支援正整數寬度及 8 的倍數高度；像素座標須為整數，界外寫入忽略、讀取為 0。
+## Sampling and diagnostics
 
-灰階輸入為 0..1 的 row-major 陣列或 `(x, y) => value`：
-
-| 模式 | 網點 |
-| --- | --- |
-| `threshold` | >=0.5 點亮 |
-| `bayer4x4` | 4×4 固定矩陣，round(value×16)，17 階 |
-| `checker` | 固定棋盤，round(value×2)，3 階 |
-
-禁止誤差擴散與 `Math.random()`。需要亂數時，使用 `src/core/prng.js` 的 `mulberry32(seed)`；固定 seed 與步長須產生相同位元組。
-
-## 預覽與檢查
-
-```sh
-node tools/render.mjs --fx eyes/happy-squint --seed 1 --frames 32 --fps 16 --dual-tone --out artifacts/sheet.png
-node tools/check.mjs
-node tools/check.mjs --fx eyes/blink --budget 3584 --flicker-threshold 0.001
+```js
+import { sampleEffect } from '../tools/sequence.mjs';
+const sequence = sampleEffect({
+  fx: 'eyes/happy-squint', profile: 'ssd1306-128x32',
+  frames: 32, fps: 16, seed: 1, lookX: 0.5, blink: 0
+});
 ```
 
-Contact sheet 有幀號、三位小數秒數、填充率、安全框及中心準星；`--still-out` 另存第一幀純 OLED 圖。`--look-x`、`--look-y`、`--blink` 可固定參數。瀏覽器與 Node 共用 `renderRGBA(fb, { scale, grid, glow, dualTone, split })`，回傳 `{ width, height, data }`；黃藍 `split` 預設頂部 16 列。
+Sampling defaults to 32 frames at 16 fps (two seconds); when changing fps, set
+`--frames` to duration×fps to retain the full loop. CLI IDs may be positional
+or `--fx id`; `--look-x`, `--look-y`, `--blink` fix parameters.
 
-- CHK-01：封鎖 `Math.random`，執行兩次，對尺寸、fps 與所有影格比較 SHA-256。
-- CHK-02：連續幀 XOR 遮罩中，沒有任何 8 鄰居的單像素變化數／所有像素轉場數，預設上限 0.001；另列出隔一幀回復原狀的數量。這是孤島閃爍代理指標，幾何動作也可能產生少量單像素變化。
-- CHK-03：壓縮資料與 uint32 offset／size 表的 flash 用量，預設上限 8192 bytes；`.h` 文字預設上限 65536 bytes（`--header-budget`）。範例的 32 KiB→3.5 KiB 目標另由測試驗證，不保證任意輸入皆可達成。
-- CHK-04：解析實際產生的 `.h` 陣列，逐幀 XOR-RLE 解碼，與輸入逐 byte 比較。
+`check.mjs` exits nonzero on a failed check. Without an ID it checks all 53 FX.
+The domain checks are:
 
-檢查失敗會以非零狀態退出；無 `--fx` 時檢查兩個範例。
+- CHK-01: prohibit `Math.random`/`Date.now`, compare two full-sequence SHA-256
+  hashes including dimensions, fps and frame count.
+- CHK-02: isolated changed pixels with no changed 8-neighbor, divided by the
+  total pixel samples across adjacent frames; default threshold 0.001. Also
+  reports changes that reverse on the next frame. This is a shimmer proxy.
+- CHK-03: compressed flash includes uint32 offsets/sizes; default 4096 bytes.
+  Emitted header text has a separate 65536-byte limit. Override with `--budget`
+  and `--header-budget` for intentionally larger animations.
+- CHK-04: parse actual generated `.h` arrays, decode every delta and compare
+  every byte with the sampled input.
 
-## 匯出與播放
+The catalog tests run these checks on every FX and both profiles. Tests also
+verify gaze boundaries, deterministic motion, pure seeking, loop wrap, emitted
+Mode B pixels, decoder malformed input, C replay, and gallery control behavior.
+The generic six-check workflow in the master PRD is broader than these four
+OLED domain gates; frame-rate benchmarking is not claimed here.
+
+## MCU formats and fixtures
 
 ```sh
-node tools/export-mcu.mjs --fx eyes/blink --profile ssd1306-128x32 --frames 32 --fps 16 --out artifacts/eyes.h --symbol eyes
-node tools/export-mcu.mjs --fixture frames.json --out artifacts/fixture.h
+node tools/export-mcu.mjs eyes/blink --format xor-rle --symbol animation --out artifacts/animation.h
+node tools/export-mcu.mjs weather/rain --format u8g2 --out artifacts/rain.h
+node tools/export-mcu.mjs system/battery --format adafruit --out artifacts/battery.h
+node tools/export-mcu.mjs --fixture frames.json --format adafruit --out artifacts/fixture.h
 ```
 
-`--profile` 同時適用於 export、render 與 check；預設 128×64，128×32 匯出會產生 `HEIGHT 32`、`PAGE_COUNT 4`、`FRAME_BYTES 512`。程式化取樣用 `sampleEffect({ fx: 'eyes/happy-squint', profile: 'ssd1306-128x32' })`。
+Node API: `exportMCU(sequence, { out, symbol, format, decoderPath })` in
+`tools/export-mcu.mjs`. Browser-safe `buildHeader`, `buildBitmapHeader` and
+`packBitmap` live in `src/core/mcu.js` and return header text/data without I/O.
+`--format` accepts only `xor-rle` (default), `u8g2`, `adafruit`. Legacy
+`--compress xor-rle` is accepted. Do not combine it with a Mode B format.
 
-Gallery 的硬體選單可即時切換這兩個 profile。外殼包含玻璃邊框、安裝孔與 I²C 針腳；Pixel grid／Soft glow 控制像素黑縫與周邊微光，黃藍模式為頂部 16 列黃光、其餘藍光。128×32 為單色藍光。兩種表情均保留滑鼠追蹤與 lookX／lookY 滑桿。
+Fixtures are `{ "width":128, "height":64, "fps":16, "frames":[[...1024 bytes...], ...] }`.
+A bare frame array uses default dimensions/fps. Bytes must be integers 0..255.
+Fixtures cannot be mixed with FX/profile/sampling flags. JS sequences use
+`Uint8Array[]`; all formats validate dimensions, frame sizes, fps and C symbols
+before writing.
 
-JSON fixture 為 `{ "width": 128, "height": 64, "fps": 16, "frames": [[...1024 bytes...], ...] }`，也可直接給影格陣列，省略尺寸時使用 128×64。每幀是 page-packed 0..255 整數，不能與 FX 取樣選項或 `--profile` 混用（fixture 自帶尺寸）。JS API `exportMCU(sequence, { out, symbol, decoderPath })` 接受 `Uint8Array[]`。
+Mode A: XOR each frame with its predecessor (zero before frame zero), then
+encode zero skips and literal blocks of 1..128 bytes:
 
-每幀與前幀 XOR（第一幀以前幀全零計算），再編碼為 1..128 bytes 的 runs：
-
-| Token | 語義 |
+| Token | Action |
 | --- | --- |
-| `0xxxxxxx` | 跳過 `token + 1` 個零 delta bytes |
-| `1xxxxxxx` | 讀入 `(token & 127) + 1` 個 literal bytes，與 framebuffer XOR |
+| `0xxxxxxx` | Skip token+1 zero delta bytes |
+| `1xxxxxxx` | XOR the next (token & 127)+1 literal bytes into framebuffer |
 
-例如 `[0,0,3,4,0]` 相對全零幀編為 `[1,129,3,4,0]`。每個編碼幀必須恰好覆蓋完整 framebuffer；JS 與 C 都拒絕截斷、溢出、長度不足。C 先驗證再修改緩衝區。
+This repository's tested wire format is authoritative; the illustrative
+repeat-value token in the master PRD is not the format used by this codec.
+Every encoded frame must cover the whole framebuffer exactly. JS and C reject
+truncation, overflow and incomplete coverage. C validates first, then mutates.
 
-`.h` 提供 `<SYMBOL>_WIDTH`、`HEIGHT`、`PAGE_COUNT`、`FRAME_BYTES`、`FRAME_COUNT`、`FPS`、`DATA_BYTES`、`STORAGE_BYTES`，以及 `<symbol>_data`、`_offsets`（含結尾位置）、`_sizes`。陣列使用 `PROGMEM`，非 AVR 平台有空巨集 fallback；匯出時也寫入 `firmware/ssd1306_xor_rle_decoder.c`（`--decoder` 可自訂位置）。
-
-ESP32／host 範例，先連結 C decoder（若由 C++ 呼叫，函式宣告用 `extern "C"`）：
+Headers contain `<PREFIX>_WIDTH`, `HEIGHT`, `FRAME_BYTES`, `FRAME_COUNT`, `FPS`,
+`DATA_BYTES`, `STORAGE_BYTES`, plus `_data`. XOR headers also have `PAGE_COUNT`,
+`_offsets` (with end sentinel) and `_sizes`; arrays are `PROGMEM`.
+The header embeds the guarded, zero-allocation `oledfx_step_frame` player and
+provides `<symbol>_step_frame(fb, index)`. CLI exports also place
+`oledfx_player.h` beside the header for direct reuse, and retain the standalone
+`firmware/ssd1306_xor_rle_decoder.c` (`--decoder` changes that destination).
+Browser header downloads are self-contained and need no decoder download.
 
 ```c
-#include <stddef.h>
-#include "eyes.h"
-int oledfx_xor_rle_decode(uint8_t *, size_t, const uint8_t *, size_t);
-static uint8_t framebuffer[EYES_FRAME_BYTES]; // 初始為 0
-// i 依序為 0..EYES_FRAME_COUNT-1，每隔 1/EYES_FPS 秒更新。
-int ok = oledfx_xor_rle_decode(framebuffer, sizeof framebuffer,
-    eyes_data + eyes_offsets[i], eyes_sizes[i]);
-// ok == 1 後，以 page order 將 framebuffer 傳給 SSD1306。
+#include "animation.h"
+// Feed indices in order into the driver's existing buffer. No malloc.
+int ok = animation_step_frame(display_buffer, frame_index);
+// Or call oledfx_step_frame(buffer, FRAME_BYTES, data, offset, size, index).
 ```
 
-AVR 的 offset／size 表用 `pgm_read_dword()` 讀取；decoder byte 讀取已使用 `pgm_read_byte()`，其他 flash 介面可覆寫 `OLEDFX_READ_BYTE(p)`。只保留一個 1024-byte（128×32 為 512-byte）framebuffer，無 malloc。**每次回到第 0 幀前必須清零**；隨機跳幀須從第 0 幀重播。排程與 SSD1306 匯流排傳送由韌體處理。
+Frame zero clears the buffer automatically, including on replay. The wrapper
+rejects invalid indices. Random seeking requires replay from zero. AVR flash
+reads use `pgm_read_byte`/`pgm_read_dword`, with configurable
+`OLEDFX_READ_BYTE`/`OLEDFX_READ_U32`; ESP32/RP2040/host use memory-mapped reads.
+The low-level C decoder does not reset buffers automatically. Its C declaration
+needs `extern "C"` when linked into C++; the header-only player needs no linking.
 
-`npm test` 包含 JS roundtrip、動畫、fixture、輸出契約及 PNG 驗證；有 `cc` 時還會以 C99 編譯 decoder，逐 byte 核對兩組動畫 × 兩種 profile。CI 使用 Node 20／22。
+Mode B: independent horizontal rows, padded to `ceil(width/8)` bytes per row,
+with unused bits zero. U8g2 uses LSB-first XBM for `drawXBMP` (PROGMEM).
+Adafruit GFX uses MSB-first for `drawBitmap`. `ROW_BYTES` replaces `PAGE_COUNT`,
+and `<symbol>_frame(i)` gives a flash pointer or null for an invalid index.
+No delta tables or decoding are needed. Standard bitmap flash usage is
+frameCount×rowBytes×height; the 4 KiB compressed budget does not apply.
+
+See [firmware examples](../firmware/examples/README.md) for four complete minimal
+sketches. The test suite compiles C99 playback with `cc` when available, checks
+every byte through two loops, and optionally compiles C++ if a frontend is
+installed. This session has C but no C++ frontend or ESP32 toolchain. Physical
+board checks and a browser/hardware comparison video remain unverified.

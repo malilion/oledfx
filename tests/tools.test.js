@@ -86,6 +86,9 @@ test('check detects nondeterminism, forbidden random, flicker and exceeded budge
   const random = Math.random;
   await assert.rejects(checkSequence(() => { Math.random(); }), /Math.random/);
   assert.equal(Math.random, random);
+  const now = Date.now;
+  await assert.rejects(checkSequence(() => { Date.now(); }), /Date.now/);
+  assert.equal(Date.now, now);
   const frames = [new Uint8Array(16), new Uint8Array(16), new Uint8Array(16)];
   for (let x = 1; x < 16; x += 3) frames[1][x] = 2;
   const flicker = await checkSequence(() => ({ width: 16, height: 8, frames }));

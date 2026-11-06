@@ -1,19 +1,21 @@
 # oledfx
 
-**微螢幕程序化動畫，把一點像素變成表情。**
+**53 procedural OLED animations. Zero runtime dependencies. One bit of personality.**
 
-為 SSD1306 128×64 等 1-bit OLED 製作動畫：用幾何畫出眼睛，在本機模擬器調整眼神，再以 **XOR-RLE → `.h`** 匯出給 MCU。純 ESM、零 runtime npm 依賴。
+小螢幕，有表情。Give a desktop robot a curious glance, a weather station a little rain, or a focus timer a steaming coffee. Preview and tune a real 1-bit framebuffer in the browser, then export a C header for your microcontroller. Pure ESM, deterministic animation, no image assets or npm install needed.
 
-![Curious eyes — OLED contact sheet](docs/images/eyes.png)
+![25 robot expressions rendered by oledfx](docs/images/eyes-library.png)
 
-- **Curious eyes**：雙圓角眼睛、視線偏移與自動／手動眨眼。
-- **Happy squint**：快速眨眼後漸入笑眼，用下方黑色圓形切出彎月。
-- **1-bit 繪圖 API**：矩形、圓形、圓角矩形與局部清除；128×64／128×32 profiles。
-- **穩定網點**：threshold、17 階 Bayer 4×4、checker，使用固定空間網點。
-- **OLED 預覽**：像素格、柔光、頂部 16 列黃光／下方藍光分區。
-- **硬體匯出**：SSD1306 垂直 page 排列、PROGMEM 陣列、零 malloc C 解碼器。
+| Category | FX | Included |
+| --- | ---: | --- |
+| Eyes | **25** | Blink, happy squint, curious tilt, sleepy, hearts, stars, surprised, charging, angry, dizzy, glitch, wink, sad, crying, sleeping, shy, suspicious, excited, determined, listening, searching, robot, sparkle, deadpan, loading |
+| Weather | **8** | Sun, cloudy, rain with splashes, thunderstorm, snow, fog, wind, moon |
+| System & IoT | **8** | Wi-Fi, Bluetooth, OTA, battery, CPU waveform, thermometer, humidity, heartbeat |
+| Pomodoro & desk | **6** | Hourglass, coffee, campfire, flip clock, fireworks, focus ring |
+| Transitions | **6** | CRT shutdown, blinds, seeded dissolve, radar, wipe, iris |
+| **Total** | **53** | All registered in the runtime index and gallery |
 
-Node.js 20+，下載後可直接執行，無須安裝套件：
+With Node.js 20+:
 
 ```sh
 npm test
@@ -21,28 +23,48 @@ npm run check
 npm run gallery
 ```
 
-開啟 `http://127.0.0.1:4173`，移動滑鼠或使用滑桿調整眼神。可切換 128×64／128×32 硬體與黃藍配色。模擬器僅在本機提供服務。
-
-```sh
-node tools/render.mjs --fx eyes/blink --dual-tone --out artifacts/eyes.png --still-out artifacts/eyes-still.png
-node tools/render.mjs --fx eyes/happy-squint --dual-tone --out artifacts/happy-squint.png
-node tools/export-mcu.mjs --fx eyes/blink --profile ssd1306-128x64 --frames 32 --fps 16 --out artifacts/eyes.h --symbol eyes
-```
-
-預設 2 秒、32 幀、16 fps：每組原始影格 32,768 bytes，範例匯出含索引表約 **2.4–3.3 KiB**。實際大小依動畫內容而變；`check` 會檢查決定性、孤立像素變動、大小預算與逐 byte 還原。
-
-![Happy squint — OLED contact sheet](docs/images/happy-squint.png)
-
-直接畫一幀：
+Open **http://127.0.0.1:4173**. The SSD1306 simulator has a PCB bezel, mounting holes and I²C pins, pixel pitch, phosphor glow, and the classic yellow top 16 rows / blue lower screen. Switch 128×64 / 128×32, adjust lookX/Y and blink, choose any FX, or browse the searchable animated catalog. Only visible catalog cards animate. Download a PNG or a complete `.h` directly in the browser.
 
 ```js
-import { createFramebuffer } from './src/core/framebuffer.js';
-import { create } from './src/fx/eyes/blink.js';
+import { createFramebuffer, effects } from './src/index.js';
 
-const fb = createFramebuffer();
-const eyes = create({ seed: 1, lookX: 0.5, lookY: -0.2, blink: 0 });
+const screen = createFramebuffer('ssd1306-128x64');
+const eyes = effects['eyes/heart'].create({ seed: 1, lookX: 0.5, lookY: -0.2 });
 eyes.step(1 / 16);
-eyes.draw(fb); // fb.data: 1024 bytes，直接對齊 SSD1306 pages
+eyes.draw(screen);
+// screen.data: 1024 bytes in native SSD1306 vertical page order.
+eyes.params.lookX = -0.5; // parameters stay live
 ```
 
-編寫動畫、JSON fixture 與 MCU 播放方式見 [AUTHORING](docs/AUTHORING.md)；產品規格保留於 [PRD 02](docs/PRD.md#prd-02oledfx)。
+The framebuffer supports `fillRect`, `fillCircle`, `fillRoundRect`, `clearRect`, fill, clear and pixel access as methods or standalone functions. Dithering includes threshold, stable Bayer 4×4 and checker patterns. The 128×32 profile uses 512 bytes per frame.
+
+Export for hardware:
+
+```sh
+# Mode A: compressed native pages; self-contained C99/C++ header + frame player.
+node tools/export-mcu.mjs eyes/happy-squint --format xor-rle --symbol animation --out artifacts/animation.h
+
+# Mode B: standard-library horizontal bitmaps.
+node tools/export-mcu.mjs weather/rain --format u8g2 --out artifacts/rain-xbm.h
+node tools/export-mcu.mjs system/battery --format adafruit --out artifacts/battery-gfx.h
+
+# Narrow OLED; --fx id is also supported by all CLIs.
+node tools/export-mcu.mjs eyes/blink --profile ssd1306-128x32 --out artifacts/blink32.h
+```
+
+XOR-RLE stores changes between frames and decodes directly into your display driver's buffer, with no heap allocation or second framebuffer. Each default two-second animation (32 frames, 16 fps, seed 1) passes the **4 KiB flash budget including offset/size tables**, on both supported profiles. Mode B stores full independent frames: U8g2 XBM is LSB-first, Adafruit GFX is MSB-first. It uses more flash and supports random frame access.
+
+Four [firmware examples](firmware/examples/README.md) cover both drivers and both export modes. Include `animation.h`, then call `animation_step_frame(display.getBuffer(), index)` or `oledfx_step_frame(...)`. Frame zero resets the buffer automatically on replay. The host C tests verify the player and decoder byte for byte; ESP32/ESP32-S3/RP2040 flashing and physical-display validation still require a board.
+
+Render reproducible visual references:
+
+```sh
+node tools/render.mjs eyes/happy-squint --dual-tone --out artifacts/contact.png
+node tools/render-catalog.mjs --out artifacts/library.png
+node tools/render-catalog.mjs --category weather --out artifacts/weather.png
+node tools/check.mjs weather/rain --profile ssd1306-128x32
+```
+
+`npm test` checks both profiles, every FX's determinism and actual emitted-header roundtrip, shimmer and flash budgets, bitmap bit ordering, C playback across repeated loops, geometry/dithering, PNGs, and gallery interactions. [AUTHORING](docs/AUTHORING.md) documents the complete API, file layout, shared helpers, fixtures, export formats and visual review workflow.
+
+This release covers the SSD1306 software pipeline in [PRD 02](docs/PRD.md). The PRD's 100-FX catalog target, RGB565/HUB75/ST7789 renderers, physical board validation and launch video remain future work. PNG references in `docs/images/` are actual framebuffer renders; they are not browser screenshots.

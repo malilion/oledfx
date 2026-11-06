@@ -76,6 +76,29 @@ h1 {
   color:#8fa3af;
   letter-spacing:1px
 }
+.stats { display:flex; gap:24px; color:#6f8999; font:11px ui-monospace,monospace; margin-top:24px; flex-wrap:wrap }
+.stats b { color:#b9e8dc; font-size:15px; margin-right:5px }
+#fx-count { float:right; color:#6adbc6; font:10px ui-monospace,monospace }
+.export-actions { display:flex; gap:8px; margin-top:14px }
+.export-actions button { background:#193532; border:1px solid #3a786b; border-radius:5px; color:#a0f0da; padding:10px 12px; font-size:11px }
+.export-status { color:#6f8999; font:10px/1.5 ui-monospace,monospace; min-height:30px }
+.library { margin-top:64px }
+.library-heading { display:flex; justify-content:space-between; align-items:center; gap:20px }
+h2 { font-size:27px; letter-spacing:-.6px; font-weight:550; margin:14px 0 24px }
+.search-label { font-size:11px; color:#8fa3af; width:240px }
+#search { width:100%; display:block; margin-top:10px; padding:12px; border:1px solid #2c3c46; border-radius:5px; background:#10171f; color:#e2edf2; font:12px ui-monospace,monospace }
+.category-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px }
+.category-tabs button { padding:9px 13px; border-radius:5px; border:1px solid #293b46; background:#10171f; color:#829ca9; font:11px ui-monospace,monospace }
+.category-tabs button[aria-pressed=true] { background:#183631; border-color:#3a786b; color:#a0f0da }
+.catalog { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px }
+.fx-card { overflow:hidden; padding:12px; background:#10171f; border:1px solid #273641; border-radius:7px; color:#cfdee5; text-align:left; transition:border-color .15s,transform .15s }
+.fx-card:hover { border-color:#5ca895; transform:translateY(-2px) }
+.fx-card canvas { border-radius:3px; background:#030609 }
+.fx-card span { display:block; font-size:12px; margin:14px 2px 5px }
+.fx-card small { display:block; font:9px ui-monospace,monospace; color:#5f8192; margin:0 2px 3px }
+.range:has(input:disabled) { opacity:.35 }
+@media(max-width:1050px) { .catalog { grid-template-columns:repeat(3,minmax(0,1fr)) } }
+@media(max-width:600px) { .catalog { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px } .library-heading { display:block } .search-label { display:block; width:100%; margin:0 0 20px } .stats { gap:14px } h2 { font-size:23px } }
 .workspace {
   display:grid;
   grid-template-columns:minmax(0,1fr) 280px;

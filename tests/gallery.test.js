@@ -5,6 +5,7 @@ import { runInNewContext } from 'node:vm';
 import { createFramebuffer } from '../src/core/framebuffer.js';
 import { renderRGBA } from '../src/core/render-rgba.js';
 import { effects } from '../src/fx/index.js';
+import { buildHeader, buildBitmapHeader } from '../src/core/mcu.js';
 
 test('gallery controls switch effects and profiles, keep pointer gaze, pause and display toggles', async () => {
   // Run the actual simulator with a small DOM harness; no browser dependency.
@@ -18,28 +19,32 @@ test('gallery controls switch effects and profiles, keep pointer gaze, pause and
       setAttribute(name, value) { this.attributes[name] = value; }
     };
   }
-  const selectors = ['canvas', '#look-x', '#look-y', '#blink', '#position', '#blink-label', '#profile', '#board-size', '.intro .eyebrow', '#dual-tone', '#glow', '#grid', '.board', '#reset', '#pause', '#clock'];
+  const selectors = ['canvas', '#look-x', '#look-y', '#blink', '#position', '#blink-label', '#profile', '#board-size', '.intro .eyebrow', '#dual-tone', '#glow', '#grid', '.board', '#reset', '#pause', '#clock', '#fx-picker', '#fx-count', '#fx-name', '#export-format', '#download-header', '#download-png', '#export-status'];
   const nodes = Object.fromEntries(selectors.map(selector => [selector, element()]));
   const ranges = ['#look-x', '#look-y', '#blink'].map(selector => nodes[selector]);
   const buttons = Object.keys(effects).map(fx => Object.assign(element(), { dataset: { fx } }));
   const canvas = nodes.canvas;
-  let image, options, nextFrame;
+  let image, options, nextFrame, downloaded, filename;
   canvas.width = 640; canvas.height = 320;
   canvas.getContext = () => ({ putImageData(value) { image = value; } });
   canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 640, height: 320 });
   const document = {
     querySelector: selector => nodes[selector],
-    querySelectorAll: selector => selector === '.effect' ? buttons : ranges
+    querySelectorAll: selector => selector === '.effect' ? buttons : ranges,
+    createElement: () => ({ click() { filename = this.download; } })
   };
   const source = (await readFile(new URL('../gallery/simulator.js', import.meta.url), 'utf8')).replace(/^import .*;\n/gm, '');
   runInNewContext(source, {
-    document, createFramebuffer, effects,
+    document, createFramebuffer, effects, buildHeader, buildBitmapHeader, Blob,
+    URL: { createObjectURL(blob) { downloaded = blob; return 'blob:test'; }, revokeObjectURL() {} },
+    setTimeout() {},
     renderRGBA(fb, opts) { options = opts; return renderRGBA(fb, opts); },
     ImageData: class { constructor(data, width, height) { Object.assign(this, { data, width, height }); } },
     requestAnimationFrame(callback) { nextFrame = callback; }
   });
   const frame = timestamp => nextFrame(timestamp);
   frame(0);
+  assert.equal((nodes['#fx-picker'].innerHTML.match(/<option /g) ?? []).length, Object.keys(effects).length);
   assert.equal(image.width, 640); assert.equal(image.height, 320);
   assert.equal(options.dualTone, true); assert.equal(options.grid, true); assert.equal(options.glow, true);
   const centered = image.data.slice();
@@ -76,4 +81,18 @@ test('gallery controls switch effects and profiles, keep pointer gaze, pause and
   assert.equal(nodes['.board'].classList.contains('glowing'), false);
   nodes['#glow'].checked = true; nodes['#glow'].fire('change');
   assert.equal(nodes['.board'].classList.contains('glowing'), true);
+  for (const fx of Object.keys(effects)) {
+    nodes['#fx-picker'].value = fx; nodes['#fx-picker'].fire('change'); frame(344);
+    assert.equal(nodes['#fx-name'].textContent, effects[fx].meta.name);
+    assert.equal(nodes['#blink-label'].hidden, !fx.startsWith('eyes/'));
+  }
+  for (const format of ['xor-rle', 'u8g2', 'adafruit']) {
+    nodes['#export-format'].value = format;
+    nodes['#download-header'].fire('click');
+    const header = await downloaded.text();
+    assert.match(header, /#define OLEDFX_ANIMATION_FRAME_COUNT 32/);
+    assert.ok(filename.endsWith(`-${format}.h`));
+    if (format === 'xor-rle') assert.match(header, /static inline int oledfx_step_frame/);
+    else assert.match(header, /horizontal rows/);
+  }
 });

@@ -45,15 +45,17 @@ export function headerRoundtrip(header, sequence, symbol = 'oledfx_animation') {
   return true;
 }
 
-export async function checkSequence(factory, { flickerThreshold = 0.001, budget = 8192, headerBudget = 65536 } = {}) {
+export async function checkSequence(factory, { flickerThreshold = 0.001, budget = 4096, headerBudget = 65536 } = {}) {
   if (!Number.isFinite(flickerThreshold) || flickerThreshold < 0 || flickerThreshold > 1 || !Number.isFinite(budget) || budget < 1 || !Number.isFinite(headerBudget) || headerBudget < 1) throw new RangeError('Invalid check limits');
   const random = Math.random;
+  const now = Date.now;
   let sequence, repeat;
   Math.random = () => { throw new Error('CHK-01: Math.random() forbidden; use mulberry32'); };
+  Date.now = () => { throw new Error('CHK-01: Date.now() forbidden; use animation time'); };
   try {
     sequence = validateSequence(await factory());
     repeat = validateSequence(await factory());
-  } finally { Math.random = random; }
+  } finally { Math.random = random; Date.now = now; }
   const hash = value => createHash('sha256').update(JSON.stringify([value.width, value.height, value.fps, value.frames.length])).update(Buffer.concat(value.frames.map(frame => Buffer.from(frame)))).digest('hex');
   const deterministic = hash(sequence) === hash(repeat);
   const flicker = islandFlickerRate(sequence), compiled = buildHeader(sequence);
@@ -70,11 +72,11 @@ export async function checkSequence(factory, { flickerThreshold = 0.001, budget 
 if (isMain(import.meta.url)) {
   try {
     const options = parseArgs(process.argv.slice(2), ['flicker-threshold', 'budget', 'header-budget']);
-    if (options.help) console.log('node tools/check.mjs [--fx eyes/blink|eyes/happy-squint | --fixture frames.json] [--profile ssd1306-128x64|ssd1306-128x32] [--frames 32 --fps 16 --seed 1] [--flicker-threshold 0.001 --budget 8192 --header-budget 65536]\nDefault: check both examples. CHK-02 measures singleton 8-connected components in consecutive XOR masks / all pixel transitions.');
+    if (options.help) console.log('node tools/check.mjs [id | --fx id | --fixture frames.json] [--profile ssd1306-128x64|ssd1306-128x32] [--frames 32 --fps 16 --seed 1] [--flicker-threshold 0.001 --budget 4096 --header-budget 65536]\nDefault: check the complete catalog. CHK-02 measures singleton 8-connected components in consecutive XOR masks / all pixel transitions.');
     else {
       const targets = options.fx || options.fixture ? [options] : Object.keys(effects).map(fx => ({ ...options, fx }));
       for (const target of targets) {
-        const result = await checkSequence(() => loadSequence(target), { flickerThreshold: numeric(options, 'flicker-threshold', 0.001), budget: numeric(options, 'budget', 8192), headerBudget: numeric(options, 'header-budget', 65536) });
+        const result = await checkSequence(() => loadSequence(target), { flickerThreshold: numeric(options, 'flicker-threshold', 0.001), budget: numeric(options, 'budget', 4096), headerBudget: numeric(options, 'header-budget', 65536) });
         console.log(result.name);
         for (const check of result.checks) console.log(`  ${check.pass ? 'PASS' : 'FAIL'} ${check.id} ${check.detail}`);
         if (!result.pass) process.exitCode = 1;

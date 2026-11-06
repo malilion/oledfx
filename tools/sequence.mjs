@@ -1,3 +1,5 @@
+import { validateSequence } from '../src/core/sequence.js';
+export { validateSequence } from '../src/core/sequence.js';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -9,6 +11,7 @@ export function parseArgs(args, extra = []) {
   const allowed = new Set(['fx', 'profile', 'frames', 'fps', 'seed', 'out', 'fixture', 'look-x', 'look-y', 'blink', ...extra]);
   const options = {};
   for (let i = 0; i < args.length; i++) {
+    if (i === 0 && !args[i].startsWith('--')) { options.fx = args[i]; continue; }
     const key = args[i].slice(2);
     if (!args[i].startsWith('--') || (!allowed.has(key) && !['help', 'dual-tone'].includes(key))) throw new Error(`Unknown argument: ${args[i]}`);
     if (['help', 'dual-tone'].includes(key)) { options[key] = true; continue; }
@@ -34,14 +37,6 @@ export function sampleEffect({ fx = 'eyes/blink', profile, frames = 32, fps = 16
     effect.step(1 / fps);
   }
   return { name: fx, width: fb.width, height: fb.height, fps, frames: sequence };
-}
-export function validateSequence(sequence) {
-  const { width = 128, height = 64, fps = 16, frames } = sequence;
-  const size = createFramebuffer(width, height).data.length;
-  if (!Array.isArray(frames) || !frames.length || frames.length > 10000) throw new RangeError('Need 1..10000 frames');
-  if (!Number.isFinite(fps) || fps <= 0 || fps > 1000) throw new RangeError('Invalid fps');
-  for (const frame of frames) if (!(frame instanceof Uint8Array) || frame.length !== size) throw new RangeError('Invalid page-packed frame size');
-  return { ...sequence, width, height, fps };
 }
 export async function loadSequence(options = {}) {
   if (options.fixture) {

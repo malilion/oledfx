@@ -9,21 +9,24 @@ import * as oldEyes from '../src/fx/eyes.js';
 import * as oldHappy from '../src/fx/happy-squint.js';
 
 for (const [id, module] of Object.entries(effects)) {
-  test(`${id}: N frames animate deterministically, stay bounded, honor look params`, () => {
+  test(`${id}: deterministic animation, frame contract and applicable gaze parameters`, () => {
     const a = sampleEffect({ fx: id, frames: 64, fps: 32, seed: 7 });
     assert.deepEqual(a, sampleEffect({ fx: id, frames: 64, fps: 32, seed: 7 }));
     assert.ok(new Set(a.frames.map(frame => Buffer.from(frame).toString('hex'))).size > 8);
     assert.equal(module.meta.id, id);
     for (const data of a.frames) {
       const fb = { width: 128, height: 64, data };
+      if (id.startsWith('transitions/')) continue;
       assert.ok(fillRate(fb) > 0 && fillRate(fb) < 0.5);
       for (let x = 0; x < 128; x++) assert.equal(getPixel(fb, x, 0) + getPixel(fb, x, 63), 0);
       for (let y = 0; y < 64; y++) assert.equal(getPixel(fb, 0, y) + getPixel(fb, 127, y), 0);
     }
     const effect = module.create({ lookX: -1, lookY: -1 }), fb = createFramebuffer();
     effect.draw(fb); const initial = fb.data.slice();
-    effect.params.lookX = 1; effect.params.lookY = 1; effect.draw(fb);
-    assert.notDeepEqual(fb.data, initial);
+    if (id.startsWith('eyes/')) {
+      effect.params.lookX = 1; effect.params.lookY = 1; effect.draw(fb);
+      assert.notDeepEqual(fb.data, initial);
+    }
     effect.step(0.25); assert.equal(effect.t, 0.25);
     effect.draw(fb); const stable = fb.data.slice(); effect.draw(fb); assert.deepEqual(fb.data, stable);
     assert.throws(() => effect.step(-1)); assert.throws(() => effect.step(NaN));
@@ -39,7 +42,9 @@ test('eyes blink closes eye area; lower-circle carving leaves crescent tops', ()
 });
 
 test('canonical eye paths enumerate once and old imports and IDs preserve output', () => {
-  assert.deepEqual(Object.keys(effects), ['eyes/blink', 'eyes/happy-squint']);
+  assert.equal(Object.keys(effects).length, 53);
+  assert.equal(Object.keys(effects).filter(id => id.startsWith('eyes/')).length, 25);
+  assert.ok(!Object.keys(effects).includes('eyes') && !Object.keys(effects).includes('happy-squint'));
   assert.equal(blink.meta.id, 'eyes/blink'); assert.equal(happy.meta.id, 'eyes/happy-squint');
   assert.equal(oldEyes.create, blink.create); assert.equal(oldHappy.create, happy.create);
   assert.equal(oldHappy.draw, happy.draw);
@@ -64,8 +69,8 @@ test('happy-squint follows PoC blink and smile curves, loops and supports manual
   happy.draw(fb, 0, { blink: 1 }); assert.ok(fillRate(fb) < open / 8);
 });
 
-test('both eye animations fit both profiles at gaze extremes throughout the loop', () => {
-  for (const profile of ['ssd1306-128x64', 'ssd1306-128x32']) for (const fx of Object.keys(effects)) {
+test('all eye animations fit both profiles at gaze extremes throughout the loop', () => {
+  for (const profile of ['ssd1306-128x64', 'ssd1306-128x32']) for (const fx of Object.keys(effects).filter(id => id.startsWith('eyes/'))) {
     const fb = createFramebuffer(profile);
     for (const lookX of [-1, 1]) for (const lookY of [-1, 1]) {
       const effect = effects[fx].create({ lookX, lookY });
