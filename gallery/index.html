@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>oledfx — 微螢幕程序化動畫</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header><a class="brand" href="./">oled<span>fx</span><i></i></a><span class="tag">LOCAL DISPLAY LAB</span></header>
+  <main>
+    <div class="intro"><p class="eyebrow">128 × 64 PIXELS. A LITTLE PERSONALITY.</p><h1>小螢幕，有表情。</h1><p>微螢幕程序化動畫。移動游標，讓眼神跟著你。</p></div>
+    <div class="workspace">
+      <section class="preview" aria-label="OLED simulator">
+        <div class="preview-top"><span><i class="status"></i> LIVE PREVIEW</span><span>SSD1306 · 1 BIT</span></div>
+        <div class="display-wrap"><div class="board"><div class="screen"><canvas width="640" height="320" aria-label="Animated OLED eyes; move pointer to change gaze"></canvas></div><div class="board-label"><span>oledfx</span><span>128×64 / I²C</span></div></div></div>
+        <div class="preview-bottom"><span id="position">X +0.00 &nbsp; Y +0.00</span><button id="pause" type="button">Pause</button><span id="clock">0.00 s</span></div>
+      </section>
+      <aside>
+        <p class="eyebrow">01 / EXPRESSION</p>
+        <div class="effects"><button type="button" class="effect active" data-fx="eyes" aria-pressed="true"><span>01</span> Curious eyes <b>● ●</b></button><button type="button" class="effect" data-fx="happy-squint" aria-pressed="false"><span>02</span> Happy squint <b>⌒ ⌒</b></button></div>
+        <p class="eyebrow section-label">02 / DISPLAY</p>
+        <label class="toggle">Yellow / blue split<input id="dual-tone" type="checkbox" checked></label>
+        <label class="toggle">Pixel grid<input id="grid" type="checkbox" checked></label>
+        <label class="toggle">Soft glow<input id="glow" type="checkbox" checked></label>
+        <p class="eyebrow section-label">03 / GAZE</p>
+        <label class="range">Horizontal<input id="look-x" type="range" min="-1" max="1" step="0.01" value="0"></label>
+        <label class="range">Vertical<input id="look-y" type="range" min="-1" max="1" step="0.01" value="0"></label>
+        <label class="range" id="blink-label">Blink <span>auto → closed</span><input id="blink" type="range" min="0" max="1" step="0.01" value="0"></label>
+        <button id="reset" class="reset" type="button">Reset gaze ↗</button>
+      </aside>
+    </div>
+    <footer><span><i class="status"></i> Procedural. Deterministic. Tiny.</span><span>SSD1306 → XOR-RLE → .h</span></footer>
+  </main>
+  <script type="module" src="./simulator.js"></script>
+</body>
+</html>
