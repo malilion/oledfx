@@ -1,114 +1,151 @@
-import * as blink from './eyes/blink.js';
-import * as happySquint from './eyes/happy-squint.js';
-import * as eyesCuriousTilt from './eyes/curious-tilt.js';
-import * as eyesSleepy from './eyes/sleepy.js';
-import * as eyesHeart from './eyes/heart.js';
-import * as eyesStar from './eyes/star.js';
-import * as eyesSurprised from './eyes/surprised.js';
-import * as eyesCharging from './eyes/charging.js';
-import * as eyesAngry from './eyes/angry.js';
-import * as eyesDizzy from './eyes/dizzy.js';
-import * as eyesGlitch from './eyes/glitch.js';
-import * as eyesWink from './eyes/wink.js';
-import * as eyesSad from './eyes/sad.js';
-import * as eyesCrying from './eyes/crying.js';
-import * as eyesSleeping from './eyes/sleeping.js';
-import * as eyesShy from './eyes/shy.js';
-import * as eyesSuspicious from './eyes/suspicious.js';
-import * as eyesExcited from './eyes/excited.js';
-import * as eyesDetermined from './eyes/determined.js';
-import * as eyesListening from './eyes/listening.js';
-import * as eyesSearching from './eyes/searching.js';
-import * as eyesRobot from './eyes/robot.js';
-import * as eyesSparkle from './eyes/sparkle.js';
-import * as eyesDeadpan from './eyes/deadpan.js';
-import * as eyesLoading from './eyes/loading.js';
-import * as weatherSun from './weather/sun.js';
-import * as weatherCloudy from './weather/cloudy.js';
-import * as weatherRain from './weather/rain.js';
-import * as weatherThunderstorm from './weather/thunderstorm.js';
-import * as weatherSnow from './weather/snow.js';
-import * as weatherFog from './weather/fog.js';
-import * as weatherWind from './weather/wind.js';
-import * as weatherMoon from './weather/moon.js';
-import * as systemWifi from './system/wifi.js';
-import * as systemBluetooth from './system/bluetooth.js';
-import * as systemOta from './system/ota.js';
-import * as systemBattery from './system/battery.js';
-import * as systemCpu from './system/cpu.js';
-import * as systemThermometer from './system/thermometer.js';
-import * as systemHumidity from './system/humidity.js';
-import * as systemHeartbeat from './system/heartbeat.js';
-import * as pomodoroHourglass from './pomodoro/hourglass.js';
-import * as pomodoroCoffee from './pomodoro/coffee.js';
-import * as pomodoroCampfire from './pomodoro/campfire.js';
-import * as pomodoroFlipClock from './pomodoro/flip-clock.js';
-import * as pomodoroFireworks from './pomodoro/fireworks.js';
-import * as pomodoroFocusRing from './pomodoro/focus-ring.js';
-import * as transitionsCrt from './transitions/crt.js';
-import * as transitionsBlinds from './transitions/blinds.js';
-import * as transitionsDissolve from './transitions/dissolve.js';
-import * as transitionsRadar from './transitions/radar.js';
-import * as transitionsWipe from './transitions/wipe.js';
-import * as transitionsIris from './transitions/iris.js';
+import * as eyes_angry from './eyes/angry.js';
+import * as eyes_blink from './eyes/blink.js';
+import * as eyes_charging from './eyes/charging.js';
+import * as eyes_crying from './eyes/crying.js';
+import * as eyes_curious_tilt from './eyes/curious-tilt.js';
+import * as eyes_deadpan from './eyes/deadpan.js';
+import * as eyes_determined from './eyes/determined.js';
+import * as eyes_dizzy from './eyes/dizzy.js';
+import * as eyes_excited from './eyes/excited.js';
+import * as eyes_glitch from './eyes/glitch.js';
+import * as eyes_happy_squint from './eyes/happy-squint.js';
+import * as eyes_heart from './eyes/heart.js';
+import * as eyes_listening from './eyes/listening.js';
+import * as eyes_loading from './eyes/loading.js';
+import * as eyes_robot from './eyes/robot.js';
+import * as eyes_sad from './eyes/sad.js';
+import * as eyes_searching from './eyes/searching.js';
+import * as eyes_shy from './eyes/shy.js';
+import * as eyes_sleeping from './eyes/sleeping.js';
+import * as eyes_sleepy from './eyes/sleepy.js';
+import * as eyes_sparkle from './eyes/sparkle.js';
+import * as eyes_star from './eyes/star.js';
+import * as eyes_surprised from './eyes/surprised.js';
+import * as eyes_suspicious from './eyes/suspicious.js';
+import * as eyes_wink from './eyes/wink.js';
+import * as weather_cloudy from './weather/cloudy.js';
+import * as weather_fog from './weather/fog.js';
+import * as weather_moon from './weather/moon.js';
+import * as weather_rain from './weather/rain.js';
+import * as weather_rainbow from './weather/rainbow.js';
+import * as weather_sandstorm from './weather/sandstorm.js';
+import * as weather_snow from './weather/snow.js';
+import * as weather_sun from './weather/sun.js';
+import * as weather_thunderstorm from './weather/thunderstorm.js';
+import * as weather_tornado from './weather/tornado.js';
+import * as weather_wind from './weather/wind.js';
+import * as system_battery from './system/battery.js';
+import * as system_bluetooth from './system/bluetooth.js';
+import * as system_cpu from './system/cpu.js';
+import * as system_fan from './system/fan.js';
+import * as system_heartbeat from './system/heartbeat.js';
+import * as system_humidity from './system/humidity.js';
+import * as system_lock from './system/lock.js';
+import * as system_ota from './system/ota.js';
+import * as system_sdcard from './system/sdcard.js';
+import * as system_signal from './system/signal.js';
+import * as system_sync from './system/sync.js';
+import * as system_thermometer from './system/thermometer.js';
+import * as system_wifi from './system/wifi.js';
+import * as pomodoro_campfire from './pomodoro/campfire.js';
+import * as pomodoro_coffee from './pomodoro/coffee.js';
+import * as pomodoro_fireworks from './pomodoro/fireworks.js';
+import * as pomodoro_flip_clock from './pomodoro/flip-clock.js';
+import * as pomodoro_focus_ring from './pomodoro/focus-ring.js';
+import * as pomodoro_hourglass from './pomodoro/hourglass.js';
+import * as pomodoro_plant from './pomodoro/plant.js';
+import * as pomodoro_stretch from './pomodoro/stretch.js';
+import * as pomodoro_tea from './pomodoro/tea.js';
+import * as pomodoro_timer_beep from './pomodoro/timer-beep.js';
+import * as pomodoro_tomato from './pomodoro/tomato.js';
+import * as transitions_bars from './transitions/bars.js';
+import * as transitions_blinds from './transitions/blinds.js';
+import * as transitions_crt from './transitions/crt.js';
+import * as transitions_dissolve from './transitions/dissolve.js';
+import * as transitions_fade_center from './transitions/fade-center.js';
+import * as transitions_iris from './transitions/iris.js';
+import * as transitions_pixels from './transitions/pixels.js';
+import * as transitions_radar from './transitions/radar.js';
+import * as transitions_scramble from './transitions/scramble.js';
+import * as transitions_slide_up from './transitions/slide-up.js';
+import * as transitions_spiral from './transitions/spiral.js';
+import * as transitions_wipe from './transitions/wipe.js';
 import * as legacyEyes from './eyes.js';
 import * as legacyHappySquint from './happy-squint.js';
 
-// Canonical IDs enumerate once; old IDs remain available to existing users.
 export const effects = Object.freeze(Object.defineProperties({
-  'eyes/blink': blink,
-  'eyes/happy-squint': happySquint,
-  'eyes/curious-tilt': eyesCuriousTilt,
-  'eyes/sleepy': eyesSleepy,
-  'eyes/heart': eyesHeart,
-  'eyes/star': eyesStar,
-  'eyes/surprised': eyesSurprised,
-  'eyes/charging': eyesCharging,
-  'eyes/angry': eyesAngry,
-  'eyes/dizzy': eyesDizzy,
-  'eyes/glitch': eyesGlitch,
-  'eyes/wink': eyesWink,
-  'eyes/sad': eyesSad,
-  'eyes/crying': eyesCrying,
-  'eyes/sleeping': eyesSleeping,
-  'eyes/shy': eyesShy,
-  'eyes/suspicious': eyesSuspicious,
-  'eyes/excited': eyesExcited,
-  'eyes/determined': eyesDetermined,
-  'eyes/listening': eyesListening,
-  'eyes/searching': eyesSearching,
-  'eyes/robot': eyesRobot,
-  'eyes/sparkle': eyesSparkle,
-  'eyes/deadpan': eyesDeadpan,
-  'eyes/loading': eyesLoading,
-  'weather/sun': weatherSun,
-  'weather/cloudy': weatherCloudy,
-  'weather/rain': weatherRain,
-  'weather/thunderstorm': weatherThunderstorm,
-  'weather/snow': weatherSnow,
-  'weather/fog': weatherFog,
-  'weather/wind': weatherWind,
-  'weather/moon': weatherMoon,
-  'system/wifi': systemWifi,
-  'system/bluetooth': systemBluetooth,
-  'system/ota': systemOta,
-  'system/battery': systemBattery,
-  'system/cpu': systemCpu,
-  'system/thermometer': systemThermometer,
-  'system/humidity': systemHumidity,
-  'system/heartbeat': systemHeartbeat,
-  'pomodoro/hourglass': pomodoroHourglass,
-  'pomodoro/coffee': pomodoroCoffee,
-  'pomodoro/campfire': pomodoroCampfire,
-  'pomodoro/flip-clock': pomodoroFlipClock,
-  'pomodoro/fireworks': pomodoroFireworks,
-  'pomodoro/focus-ring': pomodoroFocusRing,
-  'transitions/crt': transitionsCrt,
-  'transitions/blinds': transitionsBlinds,
-  'transitions/dissolve': transitionsDissolve,
-  'transitions/radar': transitionsRadar,
-  'transitions/wipe': transitionsWipe,
-  'transitions/iris': transitionsIris
+  'eyes/angry': eyes_angry,
+  'eyes/blink': eyes_blink,
+  'eyes/charging': eyes_charging,
+  'eyes/crying': eyes_crying,
+  'eyes/curious-tilt': eyes_curious_tilt,
+  'eyes/deadpan': eyes_deadpan,
+  'eyes/determined': eyes_determined,
+  'eyes/dizzy': eyes_dizzy,
+  'eyes/excited': eyes_excited,
+  'eyes/glitch': eyes_glitch,
+  'eyes/happy-squint': eyes_happy_squint,
+  'eyes/heart': eyes_heart,
+  'eyes/listening': eyes_listening,
+  'eyes/loading': eyes_loading,
+  'eyes/robot': eyes_robot,
+  'eyes/sad': eyes_sad,
+  'eyes/searching': eyes_searching,
+  'eyes/shy': eyes_shy,
+  'eyes/sleeping': eyes_sleeping,
+  'eyes/sleepy': eyes_sleepy,
+  'eyes/sparkle': eyes_sparkle,
+  'eyes/star': eyes_star,
+  'eyes/surprised': eyes_surprised,
+  'eyes/suspicious': eyes_suspicious,
+  'eyes/wink': eyes_wink,
+  'weather/cloudy': weather_cloudy,
+  'weather/fog': weather_fog,
+  'weather/moon': weather_moon,
+  'weather/rain': weather_rain,
+  'weather/rainbow': weather_rainbow,
+  'weather/sandstorm': weather_sandstorm,
+  'weather/snow': weather_snow,
+  'weather/sun': weather_sun,
+  'weather/thunderstorm': weather_thunderstorm,
+  'weather/tornado': weather_tornado,
+  'weather/wind': weather_wind,
+  'system/battery': system_battery,
+  'system/bluetooth': system_bluetooth,
+  'system/cpu': system_cpu,
+  'system/fan': system_fan,
+  'system/heartbeat': system_heartbeat,
+  'system/humidity': system_humidity,
+  'system/lock': system_lock,
+  'system/ota': system_ota,
+  'system/sdcard': system_sdcard,
+  'system/signal': system_signal,
+  'system/sync': system_sync,
+  'system/thermometer': system_thermometer,
+  'system/wifi': system_wifi,
+  'pomodoro/campfire': pomodoro_campfire,
+  'pomodoro/coffee': pomodoro_coffee,
+  'pomodoro/fireworks': pomodoro_fireworks,
+  'pomodoro/flip-clock': pomodoro_flip_clock,
+  'pomodoro/focus-ring': pomodoro_focus_ring,
+  'pomodoro/hourglass': pomodoro_hourglass,
+  'pomodoro/plant': pomodoro_plant,
+  'pomodoro/stretch': pomodoro_stretch,
+  'pomodoro/tea': pomodoro_tea,
+  'pomodoro/timer-beep': pomodoro_timer_beep,
+  'pomodoro/tomato': pomodoro_tomato,
+  'transitions/bars': transitions_bars,
+  'transitions/blinds': transitions_blinds,
+  'transitions/crt': transitions_crt,
+  'transitions/dissolve': transitions_dissolve,
+  'transitions/fade-center': transitions_fade_center,
+  'transitions/iris': transitions_iris,
+  'transitions/pixels': transitions_pixels,
+  'transitions/radar': transitions_radar,
+  'transitions/scramble': transitions_scramble,
+  'transitions/slide-up': transitions_slide_up,
+  'transitions/spiral': transitions_spiral,
+  'transitions/wipe': transitions_wipe
 }, {
   eyes: { value: legacyEyes }, 'happy-squint': { value: legacyHappySquint }
 }));

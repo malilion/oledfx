@@ -52,6 +52,41 @@ export function paintWeather(style, d, p, opts) {
     for (let i = 0; i < 3; i++) { const x = 28 + Math.sin(p * TAU + i) * 6; d.line(x, 21 + i * 12, x + 45, 21 + i * 12); d.arc(x + 45, 16 + i * 12, 5, -Math.PI, Math.PI / 2); }
     d.polygon([[84 + wave * 5, 44], [96 + wave * 5, 40], [91 + wave * 5, 51]]);
   }
+
+  if (style === 'drizzle') {
+    cloud(d, 64 + wave * 2, 16);
+    for (let i = 0; i < 9; i++) { const x = 34 + i * 7, y = 34 + ((p * 18 + i * 5) % 18); d.rect(x, y, 1, 3); }
+    d.line(34, 56, 94, 56, 1);
+  }
+  if (style === 'hail') {
+    cloud(d, 64, 15);
+    for (let i = 0; i < 8; i++) { const x = 34 + i * 8 + Math.sin(p * TAU + i) * 2, y = 32 + ((p * 22 + i * 4) % 20); d.circle(x, y, 2); }
+  }
+  if (style === 'sandstorm') {
+    for (let i = 0; i < 5; i++) { const y = 14 + i * 9, x = 18 + Math.sin(p * TAU + i) * 14; d.line(x, y, x + 60, y + 2); }
+    d.polygon([[86 + wave * 6, 40], [104 + wave * 6, 36], [96 + wave * 6, 52]]);
+  }
+  if (style === 'rainbow') {
+    const open = 0.15 + p * 0.35;
+    for (let i = 0; i < 4; i++) d.arc(64, 58, 36 - i * 5, Math.PI + open, TAU - open, 2);
+    cloud(d, 42, 46); cloud(d, 88, 46);
+  }
+  if (style === 'tornado') {
+    for (let i = 0; i < 6; i++) { const w = 8 + i * 6, y = 10 + i * 8; d.round(64 - w / 2 + Math.sin(p * TAU + i) * 4, y, w, 5, 2); }
+  }
+  if (style === 'sunrise') {
+    d.rect(8, 42, 112, 16); for (let i = 0; i < 5; i++) d.line(16 + i * 22, 42, 16 + i * 22, 54);
+    sun(d, 64, 42 - p * 16, p, 10);
+  }
+  if (style === 'starry') {
+    const rand = mulberry32(opts.seed ?? 1);
+    for (let i = 0; i < 18; i++) {
+      const x = 8 + rand() * 112, y = 8 + rand() * 40;
+      const twinkle = ((Math.floor(p * 12) + i) % 4) !== 0;
+      if (twinkle) { d.rect(x - 1, y, 3, 1); d.rect(x, y - 1, 1, 3); }
+    }
+    d.circle(96, 18, 7); d.circle(100 + wave, 15, 6, 0);
+  }
   if (style === 'moon') {
     d.circle(61, 30, 20); d.circle(70 + wave * 2, 23, 18, 0);
     for (let i = 0; i < 4; i++) { const x = 28 + rand() * 75, y = 10 + rand() * 42, r = 2 + ((i + Math.floor(p * 4)) % 2); d.rect(x - r, y, r * 2 + 1, 2); d.rect(x, y - r, 2, r * 2 + 1); }
@@ -95,6 +130,65 @@ export function paintSystem(style, d, p, opts) {
     d.circle(64, 36, 14, 0); d.polygon([[64, 16], [51, 36], [77, 36]], 0);
     for (let x = 51; x < 78; x++) d.rect(x, 39 + 3 * Math.sin(x / 5 + p * TAU), 2, 6);
   }
+
+  if (style === 'signal') {
+    for (let i = 0; i < 5; i++) {
+      const h = 10 + i * 7;
+      const lit = (Math.floor(p * 10) + i) % 5 <= Math.floor(pulse * 5);
+      d.rect(36 + i * 11, 50 - h, 7, lit ? h : Math.max(4, h * 0.25));
+    }
+  }
+  if (style === 'sync') {
+    d.arc(64, 32, 18, p * TAU, p * TAU + Math.PI * 1.4, 3);
+    d.arc(64, 32, 18, p * TAU + Math.PI, p * TAU + Math.PI * 2.4, 3);
+    d.polygon([[82, 24], [90, 32], [78, 34]]); d.polygon([[46, 40], [38, 32], [50, 30]]);
+  }
+  if (style === 'lock') {
+    const y = 28 + Math.sin(p * TAU) * 2;
+    d.round(46, y, 36, 28, 4); d.round(50, y + 4, 28, 20, 3, 0);
+    d.arc(64, y, 14, Math.PI, TAU, 3); d.rect(61, y + 10, 6, 10); d.circle(64, y + 12, 3);
+  }
+  if (style === 'unlock') {
+    d.round(46, 30, 36, 26, 4); d.round(50, 34, 28, 18, 3, 0);
+    d.arc(78 + pulse * 4, 18 - pulse * 8, 14, Math.PI, TAU, 3); d.rect(61, 40, 6, 8);
+  }
+  if (style === 'mic') {
+    d.round(56, 10, 16, 28, 8); d.arc(64, 38, 16, 0, Math.PI, 3); d.rect(62, 38, 4, 14); d.rect(52, 52, 24, 4);
+    const rings = 1 + Math.floor(pulse * 3);
+    for (let i = 0; i < rings; i++) d.arc(64, 24, 18 + i * 6, -0.9, 0.9);
+  }
+  if (style === 'speaker') {
+    d.polygon([[40, 24], [56, 24], [70, 12], [70, 52], [56, 40], [40, 40]]);
+    const rings = 1 + Math.floor(pulse * 3);
+    for (let i = 0; i < rings; i++) d.arc(74, 32, 10 + i * 6, -0.9, 0.9);
+  }
+  if (style === 'gps') {
+    const r = 16 + pulse * 4;
+    d.circle(64, 28, r); d.circle(64, 28, 8, 0); d.circle(64, 28, 4);
+    d.line(64, 12, 64, 44); d.line(48, 28, 80, 28); d.polygon([[64, 46], [56, 58], [72, 58]]);
+  }
+  if (style === 'usb') {
+    d.round(52, 8, 24, 36, 3); d.rect(58, 44, 12, 12); d.rect(56, 14, 6, 8, 0); d.rect(66, 14, 6, 8, 0);
+    d.circle(64, 34, 3 + pulse * 3);
+  }
+  if (style === 'sdcard') {
+    d.polygon([[44, 10], [78, 10], [84, 18], [84, 54], [44, 54]]); d.rect(48, 14, 28, 8, 0);
+    for (let i = 0; i < 4; i++) d.rect(50 + i * 7, 16, 4, 4);
+    const w = 8 + pulse * 18; d.round(50, 30, w, 16, 2, 0); d.rect(52, 32, Math.max(2, w - 4), 12);
+  }
+  if (style === 'fan') {
+    d.circle(64, 32, 6); for (let i = 0; i < 3; i++) { const a = p * TAU + i * TAU / 3; d.polygon([[64, 32], [64 + Math.cos(a) * 22, 32 + Math.sin(a) * 22], [64 + Math.cos(a + 0.5) * 10, 32 + Math.sin(a + 0.5) * 10]]); }
+  }
+  if (style === 'memory') {
+    d.round(24, 18, 80, 30, 3);
+    const filled = Math.floor(p * 8);
+    for (let i = 0; i < 8; i++) d.rect(30 + i * 9, 24, 6, 18 * (i <= filled ? 1 : 0.25));
+  }
+  if (style === 'alert') {
+    d.polygon([[64, 10], [28, 52], [100, 52]]); d.polygon([[64, 18], [38, 48], [90, 48]], 0);
+    d.rect(61, 26, 6, 14); d.circle(64, 46, 3);
+    if ((Math.floor(p * 8) % 2) === 0) d.circle(64, 32, 26);
+  }
   if (style === 'heartbeat') {
     d.line(18, 33, 110, 33);
     const points = [[18, 33], [43, 33], [50, 24], [57, 44], [65, 14], [72, 38], [79, 33], [110, 33]];
@@ -136,6 +230,60 @@ export function paintDesk(style, d, p, opts) {
       for (let j = 0; j < 8; j++) { const a = j * TAU / 8 + rand() * 0.1, r = 4 + age * 13; d.line(x + Math.cos(a) * r, y + Math.sin(a) * r, x + Math.cos(a) * (r + 3), y + Math.sin(a) * (r + 3), 2); }
     }
   }
+
+  if (style === 'tea') {
+    d.round(42, 28, 40, 24, 6); d.arc(82, 38, 8, -Math.PI / 2, Math.PI / 2, 3); d.line(36, 54, 90, 54, 3);
+    for (let i = 0; i < 3; i++) for (let y = 10; y < 26; y++) d.rect(50 + i * 9 + 2 * Math.sin(y / 4 + p * TAU + i), y, 2, 2);
+  }
+  if (style === 'notebook') {
+    d.round(30, 10, 68, 46, 2); d.rect(40, 10, 4, 46);
+    for (let i = 0; i < 5; i++) d.line(48, 18 + i * 7, 88, 18 + i * 7);
+    const row = Math.floor(p * 5) % 5;
+    d.line(48, 18 + row * 7, 60 + ((p * 5) % 1) * 28, 18 + row * 7, 3);
+  }
+  if (style === 'stretch') {
+    d.circle(64, 14, 6); d.line(64, 20, 64, 38, 3); d.line(64, 26, 48 - pulse * 8, 34, 3); d.line(64, 26, 80 + pulse * 8, 34, 3);
+    d.line(64, 38, 52, 54, 3); d.line(64, 38, 76, 54, 3);
+  }
+  if (style === 'plant') {
+    d.round(50, 42, 28, 14, 3); d.line(64, 42, 64, 22, 3);
+    for (let i = 0; i < 4; i++) { const a = -1.2 + i * 0.7 + wave * 0.2; d.circle(64 + Math.cos(a) * 14, 28 + Math.sin(a) * 8, 6); }
+  }
+  if (style === 'candle') {
+    d.rect(58, 28, 12, 28); d.round(56, 26, 16, 6, 3);
+    const flicker = 10 + pulse * 6 + Math.sin(p * TAU * 3) * 2;
+    d.polygon([[64, flicker], [58, 24], [70, 24]]); d.circle(64, flicker + 4, 2);
+  }
+  if (style === 'tomato') {
+    d.circle(64, 34, 18); d.circle(64, 34, 12, 0); d.polygon([[64, 12], [56, 22], [72, 22]]);
+    const n = Math.max(0, 9 - Math.floor(p * 10));
+    digit(d, n, 56, 26, 0.7);
+  }
+  if (style === 'nap') {
+    d.round(40, 34, 48, 16, 8); d.circle(50, 28, 10); d.circle(76, 28, 10);
+    d.line(44, 26, 56, 26, 2); d.line(70, 26, 82, 26, 2);
+    const phase = Math.floor(p * 6) % 3;
+    if (phase >= 0) d.rect(90, 14, 6, 2);
+    if (phase >= 1) d.rect(96, 8, 10, 2);
+    if (phase >= 2) d.rect(104, 4, 8, 2);
+  }
+  if (style === 'checklist') {
+    const done = Math.floor(p * 4);
+    for (let i = 0; i < 4; i++) {
+      d.round(28, 10 + i * 13, 14, 10, 2);
+      if (i < done) { d.line(31, 15 + i * 13, 35, 19 + i * 13, 2); d.line(35, 19 + i * 13, 40, 12 + i * 13, 2); }
+      d.line(50, 15 + i * 13, 100, 15 + i * 13);
+    }
+  }
+  if (style === 'timer-beep') {
+    d.circle(64, 32, 24); d.circle(64, 32, 18, 0); d.line(64, 32, 64, 18, 3); d.line(64, 32, 76, 32 + pulse * 4, 3);
+    if (pulse > 0.55) { d.arc(64, 32, 28, -0.4, 0.4); d.arc(64, 32, 28, Math.PI - 0.4, Math.PI + 0.4); }
+  }
+  if (style === 'desk-lamp') {
+    d.rect(58, 50, 12, 8); d.line(64, 50, 64, 28, 3); d.line(64, 28, 88, 18, 3); d.polygon([[88, 12], [104, 22], [84, 28]]);
+    const beams = 1 + Math.floor(pulse * 4);
+    for (let i = 0; i < beams; i++) d.line(96, 24, 108, 36 + i * 5);
+  }
   if (style === 'focus-ring') {
     d.arc(64, 32, 23, -Math.PI / 2, -Math.PI / 2 + TAU, 2);
     d.arc(64, 32, 19, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(opts.progress ?? (0.1 + pulse * 0.9)), 3);
@@ -159,6 +307,49 @@ export function paintTransition(style, d, p, opts, fb) {
     d.arc(64, 32, 27, 0, TAU); d.arc(64, 32, 15, 0, TAU);
     d.line(64, 32, 64 + 26 * Math.cos(p * TAU), 32 + 26 * Math.sin(p * TAU), 3);
     d.circle(77, 22, 3); d.circle(47, 41, 2);
+  }
+
+  if (style === 'pixels') {
+    // Coarse 16px tiles keep XOR deltas sparse and under the 4KB flash budget.
+    const rand = mulberry32(opts.seed ?? 1);
+    for (let y = 0; y < fb.height; y += 16) for (let x = 0; x < fb.width; x += 16) if (rand() < progress) fb.fillRect(x, y, 16, 16);
+  }
+  if (style === 'spiral') {
+    for (let i = 0; i < 40 * progress; i++) { const a = i * 0.35, r = i * 0.9; d.rect(64 + Math.cos(a) * r, 32 + Math.sin(a) * r, 3, 3); }
+  }
+  if (style === 'checker') {
+    const rows = Math.max(1, Math.round(progress * 8));
+    for (let y = 0; y < rows * 8 && y < fb.height; y += 8) for (let x = 0; x < fb.width; x += 8) {
+      if (((x + y) / 8) % 2 === 0) fb.fillRect(x, y, 8, 8);
+    }
+  }
+  if (style === 'bars') {
+    for (let i = 0; i < 8; i++) fb.fillRect(0, i * 8, Math.ceil(fb.width * Math.min(1, progress * 1.4 - i * 0.05)), 8);
+  }
+  if (style === 'circle-out') {
+    const r = 6 + Math.round(progress * 12) * 3;
+    d.arc(64, 32, r, 0, Math.PI * 2, 2);
+  }
+  if (style === 'diamond') {
+    const r = 4 + Math.round(progress * 20) * 2;
+    d.line(64, 32 - r, 64 + r, 32, 2); d.line(64 + r, 32, 64, 32 + r, 2);
+    d.line(64, 32 + r, 64 - r, 32, 2); d.line(64 - r, 32, 64, 32 - r, 2);
+  }
+  if (style === 'scramble') {
+    const rand = mulberry32(opts.seed ?? 1);
+    const n = Math.floor(progress * 12);
+    for (let i = 0; i < n; i++) {
+      const x = Math.floor(rand() * 8) * 16, y = Math.floor(rand() * 4) * 16;
+      fb.fillRect(x, y, 16, 16);
+    }
+  }
+  if (style === 'fade-center') {
+    const r = (1 - progress) * 70; d.circle(64, 32, 80); if (r > 0) d.circle(64, 32, r, 0);
+  }
+  if (style === 'slide-up') {
+    // Page-aligned rising bar (8px steps) stays XOR-friendly.
+    const h = Math.round(progress * 8) * 8;
+    if (h > 0) fb.fillRect(0, fb.height - h, fb.width, h);
   }
   if (style === 'dissolve') {
     const rand = mulberry32(opts.seed ?? 1);

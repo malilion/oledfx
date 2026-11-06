@@ -1,6 +1,6 @@
 # oledfx
 
-**53 procedural OLED animations. Zero runtime dependencies. One bit of personality.**
+**72 procedural OLED animations. Zero runtime dependencies. One bit of personality.**
 
 小螢幕，有表情。Give a desktop robot a curious glance, a weather station a little rain, or a focus timer a steaming coffee. Preview and tune a real 1-bit framebuffer in the browser, then export a C header for your microcontroller. Pure ESM, deterministic animation, no image assets or npm install needed.
 
@@ -13,7 +13,7 @@
 | System & IoT | **8** | Wi-Fi, Bluetooth, OTA, battery, CPU waveform, thermometer, humidity, heartbeat |
 | Pomodoro & desk | **6** | Hourglass, coffee, campfire, flip clock, fireworks, focus ring |
 | Transitions | **6** | CRT shutdown, blinds, seeded dissolve, radar, wipe, iris |
-| **Total** | **53** | All registered in the runtime index and gallery |
+| **Total** | **72** | All registered in the runtime index and gallery |
 
 With Node.js 20+:
 

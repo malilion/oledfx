@@ -42,7 +42,7 @@ test('eyes blink closes eye area; lower-circle carving leaves crescent tops', ()
 });
 
 test('canonical eye paths enumerate once and old imports and IDs preserve output', () => {
-  assert.equal(Object.keys(effects).length, 53);
+  assert.equal(Object.keys(effects).length, 72);
   assert.equal(Object.keys(effects).filter(id => id.startsWith('eyes/')).length, 25);
   assert.ok(!Object.keys(effects).includes('eyes') && !Object.keys(effects).includes('happy-squint'));
   assert.equal(blink.meta.id, 'eyes/blink'); assert.equal(happy.meta.id, 'eyes/happy-squint');
