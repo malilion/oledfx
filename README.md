@@ -62,6 +62,12 @@ XOR-RLE stores changes between frames and decodes directly into your display dri
 
 Four [firmware examples](firmware/examples/README.md) cover both drivers and both export modes. Include `animation.h`, then call `animation_step_frame(display.getBuffer(), index)` or `oledfx_step_frame(...)`. Frame zero resets the buffer automatically on replay. The host C tests verify the player and decoder byte for byte; ESP32/ESP32-S3/RP2040 flashing and physical-display validation still require a board.
 
+## Hardware — unverified
+
+**Physical burn not performed in this environment**
+
+Follow the [ESP32 burn guide](docs/ESP32-BURN.md) for exact exports, SSD1306 I²C wiring, opening all four Arduino examples, and the remaining hardware checklist. Run `node tools/check-firmware-examples.mjs` to generate and validate their headers in a temporary directory; it also attempts board compilation when `arduino-cli` is available. Without it, the script reports static validation only.
+
 Render reproducible visual references:
 
 ```sh
@@ -75,6 +81,10 @@ node tools/check.mjs weather/rain --profile ssd1306-128x32
 
 This release covers the SSD1306 software pipeline in [PRD 02](docs/PRD.md), including the 100-FX catalog. RGB565/HUB75/ST7789 renderers, physical board validation and launch video remain future work. PNG references in `docs/images/` are actual framebuffer renders; they are not browser screenshots.
 
-Private gallery deployment: [GitHub Pages](https://malilion.github.io/oledfx/gallery/) once private Pages is enabled and its workflow succeeds. Access is limited to authorized repository collaborators after GitHub sign-in; an anonymous 404 does not establish a deployment failure. The repository and Pages site remain private.
+Gallery access: use `npm run gallery` locally. The current personal-account Pages configuration returns 404 and does not provide a usable private gallery; a successful workflow deployment does not establish private access. Repository visibility and Pages settings are unchanged.
 
 If a command fails, use Node.js 20+ and run it from the repository root. Unknown effect IDs show example IDs; browse the full catalog in the gallery. If port 4173 is in use, run `PORT=4174 npm run gallery` on macOS/Linux and open http://127.0.0.1:4174/gallery/ (PowerShell: `$env:PORT=4174; npm run gallery`).
+
+## Hardware — unverified
+
+Physical ESP32 + OLED burns were **not** run in CI or agent boxes. Follow the reproducible procedure in [docs/ESP32-BURN.md](docs/ESP32-BURN.md) and `node tools/check-firmware-examples.mjs` for a static preflight.
