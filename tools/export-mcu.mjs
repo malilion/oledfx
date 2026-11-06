@@ -17,7 +17,7 @@ export async function exportMCU(sequence, { out = 'artifacts/eyes.h', symbol = '
 if (isMain(import.meta.url)) {
   try {
     const options = parseArgs(process.argv.slice(2), ['symbol', 'decoder']);
-    if (options.help) console.log('node tools/export-mcu.mjs [--fx eyes|happy-squint | --fixture frames.json] [--frames 32 --fps 16 --seed 1] [--out artifacts/eyes.h --symbol oledfx_animation --decoder firmware/ssd1306_xor_rle_decoder.c]');
+    if (options.help) console.log('node tools/export-mcu.mjs [--fx eyes/blink|eyes/happy-squint | --fixture frames.json] [--profile ssd1306-128x64|ssd1306-128x32] [--frames 32 --fps 16 --seed 1] [--out artifacts/eyes.h --symbol oledfx_animation --decoder firmware/ssd1306_xor_rle_decoder.c]');
     else {
       const sequence = await loadSequence(options);
       const result = await exportMCU(sequence, { out: options.out ?? `artifacts/${sequence.name}.h`, symbol: options.symbol, decoderPath: options.decoder });

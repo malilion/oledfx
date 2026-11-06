@@ -70,7 +70,7 @@ export async function checkSequence(factory, { flickerThreshold = 0.001, budget 
 if (isMain(import.meta.url)) {
   try {
     const options = parseArgs(process.argv.slice(2), ['flicker-threshold', 'budget', 'header-budget']);
-    if (options.help) console.log('node tools/check.mjs [--fx eyes|happy-squint | --fixture frames.json] [--frames 32 --fps 16 --seed 1] [--flicker-threshold 0.001 --budget 8192 --header-budget 65536]\nDefault: check both examples. CHK-02 measures singleton 8-connected components in consecutive XOR masks / all pixel transitions.');
+    if (options.help) console.log('node tools/check.mjs [--fx eyes/blink|eyes/happy-squint | --fixture frames.json] [--profile ssd1306-128x64|ssd1306-128x32] [--frames 32 --fps 16 --seed 1] [--flicker-threshold 0.001 --budget 8192 --header-budget 65536]\nDefault: check both examples. CHK-02 measures singleton 8-connected components in consecutive XOR masks / all pixel transitions.');
     else {
       const targets = options.fx || options.fixture ? [options] : Object.keys(effects).map(fx => ({ ...options, fx }));
       for (const target of targets) {

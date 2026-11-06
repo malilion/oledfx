@@ -4,8 +4,8 @@ import { effects } from '../src/fx/index.js';
 
 const $ = selector => document.querySelector(selector);
 const canvas = $('canvas'), context = canvas.getContext('2d');
-const fb = createFramebuffer();
-let effect = effects.eyes.create({ seed: 1 }), paused = false, previous;
+let fb = createFramebuffer();
+let effect = effects['eyes/blink'].create({ seed: 1 }), paused = false, previous;
 function gaze() {
   effect.params.lookX = Number($('#look-x').value);
   effect.params.lookY = Number($('#look-y').value);
@@ -28,6 +28,17 @@ for (const button of document.querySelectorAll('.effect')) button.addEventListen
   $('#blink-label').hidden = !('blink' in effect.params);
   gaze();
 });
+$('#profile').addEventListener('change', () => {
+  fb = createFramebuffer($('#profile').value);
+  canvas.width = fb.width * 5;
+  canvas.height = fb.height * 5;
+  canvas.style.aspectRatio = `${fb.width} / ${fb.height}`;
+  $('#board-size').textContent = `${fb.width}×${fb.height} / I²C`;
+  $('.intro .eyebrow').textContent = `${fb.width} × ${fb.height} PIXELS. A LITTLE PERSONALITY.`;
+  $('#dual-tone').disabled = fb.height === 32;
+  $('#dual-tone').checked = fb.height === 64;
+});
+$('#glow').addEventListener('change', () => $('.board').classList.toggle('glowing', $('#glow').checked));
 $('#reset').addEventListener('click', () => {
   for (const input of document.querySelectorAll('input[type=range]')) input.value = 0;
   gaze();

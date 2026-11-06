@@ -54,6 +54,31 @@ test('check passes both examples with exact exported-header roundtrip', async ()
   }
 });
 
+test('profile CLI exports both canonical effects with correct SSD1306 layout and roundtrip', async () => temporary(async dir => {
+  for (const fx of ['eyes/blink', 'eyes/happy-squint']) for (const [profile, height] of [['ssd1306-128x64', 64], ['ssd1306-128x32', 32]]) {
+    const out = join(dir, 'profile.h');
+    const args = ['--fx', fx, '--profile', profile, '--frames', '32', '--fps', '16'];
+    const sequence = await loadSequence(parseArgs(args));
+    assert.equal(sequence.width, 128); assert.equal(sequence.height, height);
+    assert.ok(sequence.frames.every(frame => frame.length === 128 * height / 8));
+    const run = spawnSync(process.execPath, ['tools/export-mcu.mjs', ...args, '--out', out, '--decoder', join(dir, 'decoder.c')], { encoding: 'utf8' });
+    assert.equal(run.status, 0, run.stderr);
+    const header = await readFile(out, 'utf8');
+    for (const line of [`#define OLEDFX_ANIMATION_HEIGHT ${height}`, `#define OLEDFX_ANIMATION_PAGE_COUNT ${height / 8}`, `#define OLEDFX_ANIMATION_FRAME_BYTES ${128 * height / 8}`]) assert.ok(header.includes(line), line);
+    assert.equal(headerRoundtrip(header, sequence), true);
+    const result = await checkSequence(() => sampleEffect({ fx, profile }));
+    assert.equal(result.pass, true, JSON.stringify(result));
+    assert.ok(result.storageBytes <= 3584);
+  }
+  for (const profile of ['missing', 'toString']) {
+    const run = spawnSync(process.execPath, ['tools/export-mcu.mjs', '--profile', profile, '--out', join(dir, 'invalid.h')], { encoding: 'utf8' });
+    assert.equal(run.status, 1);
+    await assert.rejects(loadSequence({ profile }), /Unknown display profile/);
+  }
+  assert.throws(() => sampleEffect({ fx: 'toString' }), /Unknown effect/);
+  await assert.rejects(loadSequence({ fixture: 'unused.json', profile: 'ssd1306-128x32' }), /cannot be combined/);
+}));
+
 test('check detects nondeterminism, forbidden random, flicker and exceeded budgets', async () => {
   let n = 0;
   const result = await checkSequence(() => ({ width: 1, height: 8, frames: [Uint8Array.of(n++)] }));
@@ -82,7 +107,7 @@ test('gallery routes local simulator and ES modules without exposing repository 
     await handleGalleryRequest({ url, method }, response);
     return response;
   };
-  for (const path of ['/', '/gallery/style.css', '/gallery/simulator.js', '/src/core/framebuffer.js', '/src/fx/eyes.js']) {
+  for (const path of ['/', '/gallery/style.css', '/gallery/simulator.js', '/src/core/framebuffer.js', '/src/core/profiles.js', '/src/fx/eyes.js', '/src/fx/happy-squint.js', '/src/fx/eyes/blink.js', '/src/fx/eyes/happy-squint.js']) {
     const response = await request(path); assert.equal(response.status, 200, path);
     assert.ok(response.body.length > 0);
   }
@@ -95,8 +120,8 @@ test('gallery routes local simulator and ES modules without exposing repository 
 
 const compiler = spawnSync('cc', ['--version'], { encoding: 'utf8' });
 test('zero-malloc C decoder exactly restores all exported frames, rejects malformed input atomically', { skip: compiler.status !== 0 ? 'Optional host C compiler unavailable' : false }, async () => temporary(async dir => {
-  for (const fx of ['eyes', 'happy-squint']) {
-    const sequence = sampleEffect({ fx });
+  for (const fx of ['eyes', 'happy-squint']) for (const profile of ['ssd1306-128x64', 'ssd1306-128x32']) {
+    const sequence = sampleEffect({ fx, profile });
     await exportMCU(sequence, { out: join(dir, 'animation.h'), decoderPath: join(dir, 'decoder.c') });
     await writeFile(join(dir, 'expected.bin'), Buffer.concat(sequence.frames.map(frame => Buffer.from(frame))));
     await writeFile(join(dir, 'verify.c'), `#include <stdio.h>

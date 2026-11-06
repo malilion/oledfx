@@ -7,7 +7,8 @@
 ![Curious eyes — OLED contact sheet](docs/images/eyes.png)
 
 - **Curious eyes**：雙圓角眼睛、視線偏移與自動／手動眨眼。
-- **Happy squint**：用下方黑色圓形切出彎月笑眼。
+- **Happy squint**：快速眨眼後漸入笑眼，用下方黑色圓形切出彎月。
+- **1-bit 繪圖 API**：矩形、圓形、圓角矩形與局部清除；128×64／128×32 profiles。
 - **穩定網點**：threshold、17 階 Bayer 4×4、checker，使用固定空間網點。
 - **OLED 預覽**：像素格、柔光、頂部 16 列黃光／下方藍光分區。
 - **硬體匯出**：SSD1306 垂直 page 排列、PROGMEM 陣列、零 malloc C 解碼器。
@@ -20,15 +21,15 @@ npm run check
 npm run gallery
 ```
 
-開啟 `http://127.0.0.1:4173`，移動滑鼠或使用滑桿調整眼神。模擬器僅在本機提供服務。
+開啟 `http://127.0.0.1:4173`，移動滑鼠或使用滑桿調整眼神。可切換 128×64／128×32 硬體與黃藍配色。模擬器僅在本機提供服務。
 
 ```sh
-node tools/render.mjs --fx eyes --dual-tone --out artifacts/eyes.png --still-out artifacts/eyes-still.png
-node tools/render.mjs --fx happy-squint --dual-tone --out artifacts/happy-squint.png
-node tools/export-mcu.mjs --fx eyes --frames 32 --fps 16 --out artifacts/eyes.h --symbol eyes
+node tools/render.mjs --fx eyes/blink --dual-tone --out artifacts/eyes.png --still-out artifacts/eyes-still.png
+node tools/render.mjs --fx eyes/happy-squint --dual-tone --out artifacts/happy-squint.png
+node tools/export-mcu.mjs --fx eyes/blink --profile ssd1306-128x64 --frames 32 --fps 16 --out artifacts/eyes.h --symbol eyes
 ```
 
-預設 2 秒、32 幀、16 fps：每組原始影格 32,768 bytes，範例匯出含索引表約 **3.0–3.3 KiB**。實際大小依動畫內容而變；`check` 會檢查決定性、孤立像素變動、大小預算與逐 byte 還原。
+預設 2 秒、32 幀、16 fps：每組原始影格 32,768 bytes，範例匯出含索引表約 **2.4–3.3 KiB**。實際大小依動畫內容而變；`check` 會檢查決定性、孤立像素變動、大小預算與逐 byte 還原。
 
 ![Happy squint — OLED contact sheet](docs/images/happy-squint.png)
 
@@ -36,7 +37,7 @@ node tools/export-mcu.mjs --fx eyes --frames 32 --fps 16 --out artifacts/eyes.h 
 
 ```js
 import { createFramebuffer } from './src/core/framebuffer.js';
-import { create } from './src/fx/eyes.js';
+import { create } from './src/fx/eyes/blink.js';
 
 const fb = createFramebuffer();
 const eyes = create({ seed: 1, lookX: 0.5, lookY: -0.2, blink: 0 });

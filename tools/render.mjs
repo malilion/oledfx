@@ -38,7 +38,7 @@ export async function savePNG(path, image) {
 if (isMain(import.meta.url)) {
   try {
     const options = parseArgs(process.argv.slice(2), ['scale', 'columns', 'samples', 'still-out']);
-    if (options.help) console.log('node tools/render.mjs [--fx eyes|happy-squint | --fixture frames.json] [--out artifacts/eyes.png --still-out artifacts/eyes-still.png] [--dual-tone --scale 3 --columns 4 --samples 12]');
+    if (options.help) console.log('node tools/render.mjs [--fx eyes/blink|eyes/happy-squint | --fixture frames.json] [--profile ssd1306-128x64|ssd1306-128x32] [--out artifacts/eyes.png --still-out artifacts/eyes-still.png] [--dual-tone --scale 3 --columns 4 --samples 12]');
     else {
       const sequence = await loadSequence(options), scale = numeric(options, 'scale', 3);
       const out = options.out ?? `artifacts/${sequence.name}.png`;

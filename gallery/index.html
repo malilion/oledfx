@@ -13,14 +13,22 @@
     <div class="workspace">
       <section class="preview" aria-label="OLED simulator">
         <div class="preview-top"><span><i class="status"></i> LIVE PREVIEW</span><span>SSD1306 · 1 BIT</span></div>
-        <div class="display-wrap"><div class="board"><div class="screen"><canvas width="640" height="320" aria-label="Animated OLED eyes; move pointer to change gaze"></canvas></div><div class="board-label"><span>oledfx</span><span>128×64 / I²C</span></div></div></div>
+        <div class="display-wrap"><div class="board glowing">
+          <div class="mount top-left" aria-hidden="true"></div><div class="mount top-right" aria-hidden="true"></div>
+          <div class="mount bottom-left" aria-hidden="true"></div><div class="mount bottom-right" aria-hidden="true"></div>
+          <div class="bezel"><div class="screen"><canvas width="640" height="320" aria-label="Animated OLED eyes; move pointer to change gaze"></canvas></div></div>
+          <div class="board-label"><span>oledfx <small>SSD1306</small></span><span id="board-size">128×64 / I²C</span></div>
+          <div class="connector" aria-label="I²C connector: GND VCC SCL SDA"><span>GND<i></i></span><span>VCC<i></i></span><span>SCL<i></i></span><span>SDA<i></i></span></div>
+        </div></div>
         <div class="preview-bottom"><span id="position">X +0.00 &nbsp; Y +0.00</span><button id="pause" type="button">Pause</button><span id="clock">0.00 s</span></div>
       </section>
       <aside>
         <p class="eyebrow">01 / EXPRESSION</p>
-        <div class="effects"><button type="button" class="effect active" data-fx="eyes" aria-pressed="true"><span>01</span> Curious eyes <b>● ●</b></button><button type="button" class="effect" data-fx="happy-squint" aria-pressed="false"><span>02</span> Happy squint <b>⌒ ⌒</b></button></div>
+        <div class="effects"><button type="button" class="effect active" data-fx="eyes/blink" aria-pressed="true"><span>01</span> Curious eyes <b>● ●</b></button><button type="button" class="effect" data-fx="eyes/happy-squint" aria-pressed="false"><span>02</span> Happy squint <b>⌒ ⌒</b></button></div>
         <p class="eyebrow section-label">02 / DISPLAY</p>
-        <label class="toggle">Yellow / blue split<input id="dual-tone" type="checkbox" checked></label>
+        <label class="profile-label" for="profile">Hardware profile</label>
+        <select id="profile"><option value="ssd1306-128x64">SSD1306 · 128 × 64</option><option value="ssd1306-128x32">SSD1306 · 128 × 32</option></select>
+        <label class="toggle">Yellow / blue split (top 16px)<input id="dual-tone" type="checkbox" checked></label>
         <label class="toggle">Pixel grid<input id="grid" type="checkbox" checked></label>
         <label class="toggle">Soft glow<input id="glow" type="checkbox" checked></label>
         <p class="eyebrow section-label">03 / GAZE</p>

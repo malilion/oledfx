@@ -6,7 +6,7 @@ import { effects } from '../src/fx/index.js';
 
 export const isMain = url => process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === url;
 export function parseArgs(args, extra = []) {
-  const allowed = new Set(['fx', 'frames', 'fps', 'seed', 'out', 'fixture', 'look-x', 'look-y', 'blink', ...extra]);
+  const allowed = new Set(['fx', 'profile', 'frames', 'fps', 'seed', 'out', 'fixture', 'look-x', 'look-y', 'blink', ...extra]);
   const options = {};
   for (let i = 0; i < args.length; i++) {
     const key = args[i].slice(2);
@@ -22,11 +22,11 @@ export function numeric(options, key, fallback) {
   if (!Number.isFinite(value)) throw new RangeError(`--${key} must be finite`);
   return value;
 }
-export function sampleEffect({ fx = 'eyes', frames = 32, fps = 16, seed = 1, ...params } = {}) {
-  if (!effects[fx]) throw new Error(`Unknown effect: ${fx}`);
+export function sampleEffect({ fx = 'eyes/blink', profile, frames = 32, fps = 16, seed = 1, ...params } = {}) {
+  if (!Object.hasOwn(effects, fx)) throw new Error(`Unknown effect: ${fx}`);
   if (!Number.isInteger(frames) || frames < 1 || frames > 10000) throw new RangeError('frames must be 1..10000');
   if (!Number.isFinite(fps) || fps <= 0 || fps > 1000) throw new RangeError('fps must be >0 and <=1000');
-  const effect = effects[fx].create({ seed, ...params }), fb = createFramebuffer();
+  const effect = effects[fx].create({ seed, ...params }), fb = createFramebuffer(profile);
   const sequence = [];
   for (let i = 0; i < frames; i++) {
     effect.draw(fb);
@@ -45,7 +45,7 @@ export function validateSequence(sequence) {
 }
 export async function loadSequence(options = {}) {
   if (options.fixture) {
-    if (options.fx !== undefined || options.frames !== undefined || options.fps !== undefined || options.seed !== undefined ||
+    if (options.fx !== undefined || options.profile !== undefined || options.frames !== undefined || options.fps !== undefined || options.seed !== undefined ||
         options['look-x'] !== undefined || options['look-y'] !== undefined || options.blink !== undefined)
       throw new Error('--fixture cannot be combined with effect sampling options');
     const source = JSON.parse(await readFile(options.fixture, 'utf8'));
@@ -61,5 +61,5 @@ export async function loadSequence(options = {}) {
   for (const [flag, key] of [['look-x', 'lookX'], ['look-y', 'lookY'], ['blink', 'blink']]) {
     if (options[flag] !== undefined) params[key] = numeric(options, flag, 0);
   }
-  return sampleEffect({ fx: options.fx, frames: numeric(options, 'frames', 32), fps: numeric(options, 'fps', 16), seed: numeric(options, 'seed', 1), ...params });
+  return sampleEffect({ fx: options.fx, profile: options.profile, frames: numeric(options, 'frames', 32), fps: numeric(options, 'fps', 16), seed: numeric(options, 'seed', 1), ...params });
 }
