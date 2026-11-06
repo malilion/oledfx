@@ -26,7 +26,12 @@ export function numeric(options, key, fallback) {
   return value;
 }
 export function sampleEffect({ fx = 'eyes/blink', profile, frames = 32, fps = 16, seed = 1, ...params } = {}) {
-  if (!Object.hasOwn(effects, fx)) throw new Error(`Unknown effect: ${fx}`);
+  if (!Object.hasOwn(effects, fx)) {
+    const category = String(fx).split('/')[0];
+    const ids = Object.keys(effects);
+    const matches = ids.filter(id => id.startsWith(`${category}/`));
+    throw new Error(`Unknown effect: "${fx}". Try: ${(matches.length ? matches : ids).slice(0, 5).join(', ')}. Browse all IDs with npm run gallery (http://127.0.0.1:4173/gallery/ by default).`);
+  }
   if (!Number.isInteger(frames) || frames < 1 || frames > 10000) throw new RangeError('frames must be 1..10000');
   if (!Number.isFinite(fps) || fps <= 0 || fps > 1000) throw new RangeError('fps must be >0 and <=1000');
   const effect = effects[fx].create({ seed, ...params }), fb = createFramebuffer(profile);

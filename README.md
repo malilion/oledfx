@@ -23,10 +23,13 @@ With Node.js 20+:
 ```sh
 npm test
 npm run check
+node tools/check.mjs eyes/happy-squint
+node tools/render.mjs eyes/happy-squint --dual-tone --out artifacts/contact.png
+# Open artifacts/contact.png for an annotated timeline.
 npm run gallery
 ```
 
-Open **http://127.0.0.1:4173**. The SSD1306 simulator has a PCB bezel, mounting holes and I²C pins, pixel pitch, phosphor glow, and the classic yellow top 16 rows / blue lower screen. Switch 128×64 / 128×32, adjust lookX/Y and blink, choose any FX, or browse the searchable animated catalog. Only visible catalog cards animate. Download a PNG or a complete `.h` directly in the browser.
+Open **http://127.0.0.1:4173/gallery/**. The server also opens the gallery at `/`. The SSD1306 simulator has a PCB bezel, mounting holes and I²C pins, pixel pitch, phosphor glow, and the classic yellow top 16 rows / blue lower screen. Switch 128×64 / 128×32, adjust lookX/Y and blink, choose any FX, or browse the searchable animated catalog. Only visible catalog cards animate. Download a PNG or a complete `.h` directly in the browser.
 
 ```js
 import { createFramebuffer, effects } from './src/index.js';
@@ -71,3 +74,7 @@ node tools/check.mjs weather/rain --profile ssd1306-128x32
 `npm test` checks both profiles, every FX's determinism and actual emitted-header roundtrip, shimmer and flash budgets, bitmap bit ordering, C playback across repeated loops, geometry/dithering, PNGs, and gallery interactions. [AUTHORING](docs/AUTHORING.md) documents the complete API, file layout, shared helpers, fixtures, export formats and visual review workflow.
 
 This release covers the SSD1306 software pipeline in [PRD 02](docs/PRD.md), including the 100-FX catalog. RGB565/HUB75/ST7789 renderers, physical board validation and launch video remain future work. PNG references in `docs/images/` are actual framebuffer renders; they are not browser screenshots.
+
+Private gallery deployment: [GitHub Pages](https://malilion.github.io/oledfx/gallery/) once private Pages is enabled and its workflow succeeds. Access is limited to authorized repository collaborators after GitHub sign-in; an anonymous 404 does not establish a deployment failure. The repository and Pages site remain private.
+
+If a command fails, use Node.js 20+ and run it from the repository root. Unknown effect IDs show example IDs; browse the full catalog in the gallery. If port 4173 is in use, run `PORT=4174 npm run gallery` on macOS/Linux and open http://127.0.0.1:4174/gallery/ (PowerShell: `$env:PORT=4174; npm run gallery`).

@@ -155,3 +155,16 @@ int main(int argc, char **argv) {
     assert.equal(verify.status, 0, `${fx}: exit ${verify.status} ${verify.stderr}`);
   }
 }));
+
+
+test('unknown effects show valid category IDs and gallery guidance for all sampling CLIs', async () => {
+  for (const args of [['eyes/not-an-effect'], ['--fx', 'eyes/not-an-effect']]) {
+    await assert.rejects(loadSequence(parseArgs(args)), error => {
+      assert.match(error.message, /Unknown effect: "eyes\/not-an-effect"/);
+      assert.match(error.message, /eyes\/blink/);
+      assert.match(error.message, /npm run gallery.*4173\/gallery\//);
+      return true;
+    });
+  }
+  assert.throws(() => sampleEffect({ fx: 'toString' }), /Unknown effect/);
+});
