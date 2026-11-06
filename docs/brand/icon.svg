@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="oledfx">
+  <defs>
+    <clipPath id="tile"><rect width="512" height="512" rx="96"/></clipPath>
+  </defs>
+  <!-- black OLED body, family rounded tile -->
+  <rect width="512" height="512" rx="96" fill="#050608"/>
+  <rect x="18" y="18" width="476" height="476" rx="82" fill="none" stroke="#1a222c" stroke-width="6"/>
+  <!-- dual-tone panel: top yellow 16/64 ≈ 25% of inner, rest cyan-blue -->
+  <g clip-path="url(#tile)">
+    <rect x="56" y="72" width="400" height="100" fill="#0a0c10"/>
+    <rect x="56" y="172" width="400" height="268" fill="#07090c"/>
+    <!-- pixel pitch hint: faint grid -->
+    <g stroke="#10151c" stroke-width="1" opacity="0.85">
+      <path d="M56 92 H456 M56 112 H456 M56 132 H456 M56 152 H456"/>
+      <path d="M56 192 H456 M56 212 H456 M56 232 H456 M56 252 H456 M56 272 H456 M56 292 H456 M56 312 H456 M56 332 H456 M56 352 H456 M56 372 H456 M56 392 H456 M56 412 H456"/>
+    </g>
+  </g>
+  <!-- 1-bit happy-squint eyes: chunky pixels, yellow on top band / blue below -->
+  <!-- Left eye (yellow zone) -->
+  <g fill="#ffd241">
+    <rect x="118" y="108" width="16" height="16"/><rect x="134" y="108" width="16" height="16"/><rect x="150" y="108" width="16" height="16"/><rect x="166" y="108" width="16" height="16"/><rect x="182" y="108" width="16" height="16"/>
+    <rect x="102" y="124" width="16" height="16"/><rect x="198" y="124" width="16" height="16"/>
+    <rect x="102" y="140" width="16" height="16"/><rect x="198" y="140" width="16" height="16"/>
+    <!-- squint crease -->
+    <rect x="118" y="148" width="16" height="8"/><rect x="134" y="152" width="16" height="8"/><rect x="150" y="152" width="16" height="8"/><rect x="166" y="152" width="16" height="8"/><rect x="182" y="148" width="16" height="8"/>
+  </g>
+  <!-- Right eye (yellow zone) -->
+  <g fill="#ffd241">
+    <rect x="294" y="108" width="16" height="16"/><rect x="310" y="108" width="16" height="16"/><rect x="326" y="108" width="16" height="16"/><rect x="342" y="108" width="16" height="16"/><rect x="358" y="108" width="16" height="16"/>
+    <rect x="278" y="124" width="16" height="16"/><rect x="374" y="124" width="16" height="16"/>
+    <rect x="278" y="140" width="16" height="16"/><rect x="374" y="140" width="16" height="16"/>
+    <rect x="294" y="148" width="16" height="8"/><rect x="310" y="152" width="16" height="8"/><rect x="326" y="152" width="16" height="8"/><rect x="342" y="152" width="16" height="8"/><rect x="358" y="148" width="16" height="8"/>
+  </g>
+  <!-- blue zone: tiny status + wifi bars as 1-bit UI -->
+  <g fill="#4bc3ff">
+    <rect x="152" y="236" width="16" height="16"/><rect x="168" y="220" width="16" height="32"/><rect x="184" y="204" width="16" height="48"/>
+    <rect x="232" y="252" width="48" height="16"/>
+    <rect x="312" y="220" width="16" height="48"/><rect x="328" y="236" width="16" height="32"/><rect x="344" y="252" width="16" height="16"/>
+    <!-- blink cursor block -->
+    <rect x="232" y="300" width="48" height="16"/>
+    <rect x="200" y="332" width="16" height="16"/><rect x="216" y="348" width="16" height="16"/><rect x="232" y="364" width="48" height="16"/><rect x="280" y="348" width="16" height="16"/><rect x="296" y="332" width="16" height="16"/>
+  </g>
+  <!-- bezel screw dots -->
+  <circle cx="72" cy="88" r="6" fill="#2a3340"/>
+  <circle cx="440" cy="88" r="6" fill="#2a3340"/>
+  <circle cx="72" cy="424" r="6" fill="#2a3340"/>
+  <circle cx="440" cy="424" r="6" fill="#2a3340"/>
+</svg>

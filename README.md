@@ -1,5 +1,8 @@
 # oledfx
 
+<p align="center"><img src="docs/brand/icon-512.png" alt="oledfx mark — 1-bit OLED eyes" width="160" height="160"></p>
+
+
 **100 procedural OLED animations. Zero runtime dependencies. One bit of personality.**
 
 小螢幕，有表情。Give a desktop robot a curious glance, a weather station a little rain, or a focus timer a steaming coffee. Preview and tune a real 1-bit framebuffer in the browser, then export a C header for your microcontroller. Pure ESM, deterministic animation, no image assets or npm install needed.
