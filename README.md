@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Runtime_Dependencies-0_Zero-ffd241?style=flat-square" alt="Zero Dependencies">
   <img src="https://img.shields.io/badge/Flash_Budget-%3C_4_KiB-ff6b2b?style=flat-square" alt="< 4 KiB">
   <img src="https://img.shields.io/badge/Hardware_Profiles-1--bit_%26_RGB565-4bc3ff?style=flat-square" alt="Hardware Profiles">
-  <img src="https://img.shields.io/badge/Repository-Private_%26_Secure_Pages-a855f7?style=flat-square" alt="Private Repo">
+  <img src="https://img.shields.io/badge/Architecture-Pure_ESM_%26_C99-a855f7?style=flat-square" alt="Architecture">
 </p>
 
 ---
@@ -94,11 +94,12 @@ Purpose-built for AI-agent pair programming and automation:
 ## ✦ Quick Start
 
 ### Launch the Interactive Lab
-Zero installation friction—runs immediately in your browser:
-```sh
-npm run gallery
-```
-Open **http://127.0.0.1:4173/gallery/** to audition all 100 FX, adjust gaze tracking parameters (Look X/Y), toggle hardware bezels, and copy production-ready C headers with one click.
+- **Live Online Showcase**: **[malilion.github.io/oledfx/gallery](https://malilion.github.io/oledfx/gallery/)**
+- **Local Workbench**:
+  ```sh
+  npm run gallery
+  ```
+  Open **http://127.0.0.1:4173/gallery/** to audition all 100 FX, adjust gaze tracking parameters (Look X/Y), toggle hardware bezels, and copy production-ready C headers with one click.
 
 ### Using in Web / Node.js
 ```js
@@ -138,17 +139,6 @@ void loop() {
   delay(1000 / 16); // 16 fps smooth playback
 }
 ```
-
----
-
-## ✦ Privacy & Repository Security
-
-> [!IMPORTANT]
-> **This repository and its online showcase are strictly maintained under Private access.**
-
-- **Repository Privacy**: This GitHub repository is configured as `private: true`. Proprietary source code, design assets, and internal documentation remain non-public.
-- **GitHub Pages Access Control**: The automated CI/CD pipeline enforces strict privacy gates, ensuring that deployment artifacts are accessible exclusively to authenticated repository collaborators. Unauthorized or anonymous requests return a 404 response.
-- **Air-Gapped Local Operation**: All algorithms and tooling operate with pure ESM zero-dependency architecture, enabling 100% offline, local air-gapped development.
 
 ---
 

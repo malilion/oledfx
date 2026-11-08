@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/執行時期依賴-0%20Zero-ffd241?style=flat-square" alt="零依賴">
   <img src="https://img.shields.io/badge/Flash預算-%3C%204%20KiB-ff6b2b?style=flat-square" alt="< 4 KiB">
   <img src="https://img.shields.io/badge/硬體設定檔-1--bit%20%26%20RGB565-4bc3ff?style=flat-square" alt="硬體支援">
-  <img src="https://img.shields.io/badge/倉庫狀態-私有專案%20%26%20Private%20Pages-a855f7?style=flat-square" alt="私有倉庫">
+  <img src="https://img.shields.io/badge/架構-Pure%20ESM%20%26%20C99-a855f7?style=flat-square" alt="架構">
 </p>
 
 ---
@@ -94,11 +94,12 @@
 ## ✦ 快速體驗 (Quick Start)
 
 ### 啟動互動實驗室 (Interactive Lab)
-本地開箱即用，無需複雜建置工具：
-```sh
-npm run gallery
-```
-瀏覽器開啟 **http://127.0.0.1:4173/gallery/** 即可即時體驗全套 100 款特效、調節注視角度（Look X/Y）、調速慢放、切換硬體邊框，並直接單鍵複製 C 語言 PROGMEM 標頭檔。
+- **線上即時展示**：**[malilion.github.io/oledfx/gallery](https://malilion.github.io/oledfx/gallery/)**
+- **本地開箱即用**：
+  ```sh
+  npm run gallery
+  ```
+  瀏覽器開啟 **http://127.0.0.1:4173/gallery/** 即可即時體驗全套 100 款特效、調節注視角度（Look X/Y）、調速慢放、切換硬體邊框，並直接單鍵複製 C 語言 PROGMEM 標頭檔。
 
 ### 在 Web / Node.js 專案中使用
 ```js
@@ -138,17 +139,6 @@ void loop() {
   delay(1000 / 16); // 16 fps 流暢播放
 }
 ```
-
----
-
-## ✦ 隱私與安全架構說明 (Privacy & Repository Security)
-
-> [!IMPORTANT]
-> **本專案倉庫與線上展示頁面嚴格維持私有（Private）狀態。**
-
-- **原始碼隱私**：本 GitHub Repository 設為 `private: true`，原始碼、內部文檔與技術細節絕不公開。
-- **GitHub Pages 存取控制**：CI/CD 部署管線內建雙重驗證閘門，確保只有經授權並登入 GitHub 的倉庫協作者方可存取線上展示頁面；匿名存取將一律返回 404，嚴防任何內部資料外洩。
-- **純本地無聯網運作**：所有演算法與工具鏈均為純 ESM 零外部網路依賴設計，可在完全斷網的封閉環境中安全執行。
 
 ---
 
