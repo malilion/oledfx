@@ -50,7 +50,7 @@ Covering five core hardware and interactive scenarios:
 - ⏳ **Desk & Pomodoro Companion (Pomodoro & Desk · 20 FX)**: Flip clock, steaming coffee mug, crackling campfire, hourglass, deep breathing guide, and stretch prompt.
 - 🎞️ **Industrial Micro-Transitions & Shaders (Transitions · 15 FX)**: Vintage CRT collapse, venetian blinds, iris zoom, radar sweep, pixel scramble, and particle dissolve.
 
-### 2. Awwwards-Grade Interactive Lab Showcase
+### 2. Interactive Lab Showcase
 An embedded hardware workbench directly inside the browser:
 - **3D Tilt Bezel with Dynamic Glare**: Interactive perspective tracking with realistic anodized aluminum matte casing and optical glass glare.
 - **Authentic OLED Phosphor Simulation**: Recreates genuine SSD1306 dual-tone yellow top / blue bottom split, phosphor decay, and subpixel grid pitch.
