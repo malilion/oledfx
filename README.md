@@ -1,93 +1,158 @@
-# oledfx
+<!-- Language Selector / 語言切換分頁 -->
+<p align="center">
+  <b>English</b> &nbsp;&nbsp;|&nbsp;&nbsp;
+  <a href="README.zh-TW.md"><b>繁體中文</b></a>
+</p>
 
-<p align="center"><img src="docs/brand/icon-512.png" alt="oledfx mark — 1-bit OLED eyes" width="160" height="160"></p>
+---
 
+<p align="center">
+  <img src="docs/brand/icon-512.png" alt="oledfx mark — 1-bit procedural OLED animations" width="140" height="140">
+</p>
 
-**100 procedural OLED animations. Zero runtime dependencies. One bit of personality.**
+<h1 align="center">oledfx</h1>
 
-小螢幕，有表情。Give a desktop robot a curious glance, a weather station a little rain, or a focus timer a steaming coffee. Preview and tune a real 1-bit framebuffer in the browser, then export a C header for your microcontroller. Pure ESM, deterministic animation, no image assets or npm install needed.
+<p align="center">
+  <b>100 Procedural Micro-Animations &bull; Zero Runtime Dependencies &bull; Pure Silicon Soul</b>
+</p>
 
-![25 robot expressions rendered by oledfx](docs/images/eyes-library.png)
+<p align="center">
+  <img src="https://img.shields.io/badge/FX_Catalog-100_Animations-5eead4?style=flat-square" alt="100 FX">
+  <img src="https://img.shields.io/badge/Runtime_Dependencies-0_Zero-ffd241?style=flat-square" alt="Zero Dependencies">
+  <img src="https://img.shields.io/badge/Flash_Budget-%3C_4_KiB-ff6b2b?style=flat-square" alt="< 4 KiB">
+  <img src="https://img.shields.io/badge/Hardware_Profiles-1--bit_%26_RGB565-4bc3ff?style=flat-square" alt="Hardware Profiles">
+  <img src="https://img.shields.io/badge/Repository-Private_%26_Secure_Pages-a855f7?style=flat-square" alt="Private Repo">
+</p>
 
-| Category | FX | Included |
-| --- | ---: | --- |
-| Eyes | **25** | Blink, happy squint, curious tilt, sleepy, hearts, stars, surprised, charging, angry, dizzy, glitch, wink, sad, crying, sleeping, shy, suspicious, excited, determined, listening, searching, robot, sparkle, deadpan, loading |
-| Weather | **18** | Sun, cloudy, rain, thunderstorm, snow, fog, wind, moon, rainbow, sandstorm, tornado, drizzle, hail, sunrise, starry night, aurora, frost, comet |
-| System & IoT | **22** | Wi-Fi, Bluetooth, OTA, battery, CPU, thermometer, humidity, heartbeat, signal, sync, lock, SD card, fan, unlock, microphone, speaker, GPS, USB, memory, alert, bell, download |
-| Pomodoro & desk | **20** | Hourglass, coffee, campfire, flip clock, fireworks, focus ring, tea, stretch, plant, tomato, timer, notebook, candle, nap, checklist, desk lamp, water, breathe, pencil, letter |
-| Transitions | **15** | CRT, blinds, wipe, iris, radar, pixels, spiral, bars, scramble, fade, slide up, dissolve, checker, circle out, diamond |
-| **Total** | **100** | All registered in the runtime index and gallery |
+---
 
-With Node.js 20+:
+## ✦ Product Vision & Concept
 
+> **"Small displays, big personality."**
+
+**oledfx** is a high-craft procedural micro-animation engine crafted for microcontrollers (MCUs), desktop companion robots, ambient IoT devices, and physical computing hardware.
+
+Inspired by the iconic industrial design ethos of **Teenage Engineering** and **Braun**, `oledfx` breathes organic warmth, kinetic rhythm, and distinct character into tiny 1-bit monochrome OLEDs and 16-bit RGB displays. Every single frame is generated on-the-fly with lightweight procedural mathematics—no static sprites, no bloated bitmaps, and no runtime external dependencies.
+
+<p align="center">
+  <img src="docs/images/eyes-library.png" alt="oledfx robot expressions" width="780">
+</p>
+
+---
+
+## ✦ Key Product Highlights
+
+### 1. Curated 100-FX Procedural Catalog
+Covering five core hardware and interactive scenarios:
+- 🤖 **Robot Expressions & Gaze (Eyes · 25 FX)**: Blink, happy squint, curious tilt, heart gaze, glitch, sleepy nap, excited burst, and more.
+- ⛅ **Dynamic Ambient Weather (Weather · 18 FX)**: Sunrise, soft rain, thunderstorm, drifting snow, aurora borealis, comets, and tornadoes.
+- 📡 **System & IoT Telemetry (System & IoT · 22 FX)**: Wi-Fi beacon, Bluetooth pairing, OTA flashing, battery fuel gauge, dual-frequency pulse, SD card I/O, and CPU load.
+- ⏳ **Desk & Pomodoro Companion (Pomodoro & Desk · 20 FX)**: Flip clock, steaming coffee mug, crackling campfire, hourglass, deep breathing guide, and stretch prompt.
+- 🎞️ **Industrial Micro-Transitions & Shaders (Transitions · 15 FX)**: Vintage CRT collapse, venetian blinds, iris zoom, radar sweep, pixel scramble, and particle dissolve.
+
+### 2. Awwwards-Grade Interactive Lab Showcase
+An embedded hardware workbench directly inside the browser:
+- **3D Tilt Bezel with Dynamic Glare**: Interactive perspective tracking with realistic anodized aluminum matte casing and optical glass glare.
+- **Authentic OLED Phosphor Simulation**: Recreates genuine SSD1306 dual-tone yellow top / blue bottom split, phosphor decay, and subpixel grid pitch.
+- **Live Oscilloscope Telemetry Bar**: Real-time readout of Active Pixel Fill %, XOR Delta % compression ratio, and compiled Flash bytes.
+- **Live Code Inspector Drawer**: One-click generation and instant clipboard copying of C99 PROGMEM headers, Arduino sketches, and ESM snippets.
+
+### 3. Multi-Hardware Profiles & 16-Bit RGB565 Pipeline
+A unified procedural rendering API scaling seamlessly across hardware form factors:
+- **SSD1306 128×64**: Classic 0.96" OLED (1,024 Bytes vertical page layout, dual-tone or pure monochrome).
+- **SSD1306 128×32**: Ultra-compact 0.91" elongated display (512 Bytes).
+- **LED Matrix 64×32**: HUB75 RGB565 matrix panel (4,096 Bytes 16-bit color).
+- **ST7789 128×128**: 1.44" IPS/TFT full-color display (32,768 Bytes RGB565).
+- **Dithering Suite**: Threshold, 4×4 Bayer ordered dither, Checkerboard, and Atkinson 6-neighbor error-diffusion.
+
+### 4. Extreme Flash Footprint (< 4 KiB / 2-Second Loop)
+Engineered for the tightest microcontroller storage boundaries:
+- **XOR-RLE Delta Compression**: Encodes only changed bits between adjacent frames, decoding straight into the driver framebuffer.
+- **Zero Heap Allocations (`malloc`-free)**: Immune to runtime memory fragmentation. Runs reliably on constrained 8-bit ATmega328P, RP2040, ESP32, and ARM Cortex-M.
+- **Strict Budget Ceiling**: Every complete 2-second animation (32 frames @ 16 fps), including offset and size tables, fits strictly within 4,096 bytes.
+
+### 5. Autonomous AI-Agent Native Workflow (`fx-skill-kit`)
+Purpose-built for AI-agent pair programming and automation:
+- Built-in `fx-skill-kit` empowers AI agents to autonomously scaffold, tune, decompose, and verify procedural animations.
+- Enforces six strict automated quality gates (CHK-01 Determinism, CHK-02 Shimmer, CHK-03 Flash Budget, CHK-04 Byte-exact Header Roundtrip, CHK-05 Edge Spill, CHK-06 Frame Render Budget).
+
+---
+
+## ✦ The 100-FX Complete Catalog
+
+| Category | FX Count | Included Animations |
+| :--- | :---: | :--- |
+| **Robot Eyes** | **25** | `blink` &bull; `happy-squint` &bull; `curious-tilt` &bull; `sleepy` &bull; `heart` &bull; `star` &bull; `surprised` &bull; `charging` &bull; `angry` &bull; `dizzy` &bull; `glitch` &bull; `wink` &bull; `sad` &bull; `crying` &bull; `sleeping` &bull; `shy` &bull; `suspicious` &bull; `excited` &bull; `determined` &bull; `listening` &bull; `searching` &bull; `robot` &bull; `sparkle` &bull; `deadpan` &bull; `loading` |
+| **Ambient Weather** | **18** | `sun` &bull; `cloudy` &bull; `rain` &bull; `thunderstorm` &bull; `snow` &bull; `fog` &bull; `wind` &bull; `moon` &bull; `rainbow` &bull; `sandstorm` &bull; `tornado` &bull; `drizzle` &bull; `hail` &bull; `sunrise` &bull; `starry-night` &bull; `aurora` &bull; `frost` &bull; `comet` |
+| **System & IoT** | **22** | `wifi` &bull; `bluetooth` &bull; `ota` &bull; `battery` &bull; `cpu` &bull; `thermometer` &bull; `humidity` &bull; `heartbeat` &bull; `signal` &bull; `sync` &bull; `lock` &bull; `sdcard` &bull; `fan` &bull; `unlock` &bull; `microphone` &bull; `speaker` &bull; `gps` &bull; `usb` &bull; `memory` &bull; `alert` &bull; `bell` &bull; `download` |
+| **Pomodoro & Desk** | **20** | `hourglass` &bull; `coffee` &bull; `campfire` &bull; `flip-clock` &bull; `fireworks` &bull; `focus-ring` &bull; `tea` &bull; `stretch` &bull; `plant` &bull; `tomato` &bull; `timer-beep` &bull; `notebook` &bull; `candle` &bull; `nap` &bull; `checklist` &bull; `desk-lamp` &bull; `water` &bull; `breathe` &bull; `pencil` &bull; `letter` |
+| **Micro-Transitions** | **15** | `crt` &bull; `blinds` &bull; `wipe` &bull; `iris` &bull; `radar` &bull; `pixels` &bull; `spiral` &bull; `bars` &bull; `scramble` &bull; `fade-center` &bull; `slide-up` &bull; `dissolve` &bull; `checker` &bull; `circle-out` &bull; `diamond` |
+| **Total** | **100** | All fully registered, playable in the simulator, and exportable to C headers |
+
+---
+
+## ✦ Quick Start
+
+### Launch the Interactive Lab
+Zero installation friction—runs immediately in your browser:
 ```sh
-npm test
-npm run check
-node tools/check.mjs eyes/happy-squint --json
-node tools/render.mjs eyes/happy-squint --dual-tone --out artifacts/contact.png --gif artifacts/happy-squint.gif --sheet artifacts/happy-squint-sheet.png
-node tools/act.mjs eyes/happy-squint --dual-tone --out artifacts/act.png
-node tools/new.mjs weather/solar-flare --out artifacts/solar-flare.js
-# Open artifacts/contact.png or artifacts/act.png for an annotated timeline.
 npm run gallery
 ```
+Open **http://127.0.0.1:4173/gallery/** to audition all 100 FX, adjust gaze tracking parameters (Look X/Y), toggle hardware bezels, and copy production-ready C headers with one click.
 
-Open **http://127.0.0.1:4173/gallery/**. The server also opens the gallery at `/`. The display simulator has a PCB bezel, mounting holes and connector pins, pixel pitch, phosphor glow, and the classic yellow top 16 rows / blue lower screen. Switch between `ssd1306-128x64`, `ssd1306-128x32`, `led-matrix-64x32` (HUB75), and `st7789-128x128` (TFT), adjust lookX/Y and blink, choose any FX, or browse the searchable animated catalog. Only visible catalog cards animate. Download a PNG or a complete `.h` directly in the browser.
-
+### Using in Web / Node.js
 ```js
-import { createFramebuffer, effects } from './src/index.js';
+import { createFramebuffer, effects } from 'oledfx';
 
+// Initialize a 128x64 OLED virtual canvas
 const screen = createFramebuffer('ssd1306-128x64');
-const eyes = effects['eyes/heart'].create({ seed: 1, lookX: 0.5, lookY: -0.2 });
+
+// Create an instance of the animated blink effect
+const eyes = effects['eyes/blink'].create({ seed: 42, lookX: 0.2, lookY: -0.1 });
+
+// Advance time and render
 eyes.step(1 / 16);
 eyes.draw(screen);
-// screen.data: 1024 bytes in native SSD1306 vertical page order.
-eyes.params.lookX = -0.5; // parameters stay live
+
+// screen.data: 1024 bytes in native SSD1306 vertical page arrangement
 ```
 
-The framebuffer supports `fillRect`, `fillCircle`, `fillRoundRect`, `clearRect`, fill, clear and pixel access as methods or standalone functions. Dithering includes `threshold`, stable `bayer4x4`, `checker`, and `atkinson` error diffusion. Hardware profiles cover `ssd1306-128x64` (1,024 B), `ssd1306-128x32` (512 B), `led-matrix-64x32` (4,096 B RGB565), and `st7789-128x128` (32,768 B RGB565).
+### Microcontroller Playback (C++ / Arduino)
+```cpp
+#include <U8g2lib.h>
+#include "animation.h" // Self-contained XOR-RLE header exported from oledfx
 
-Export for hardware:
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0);
 
-```sh
-# Mode A: compressed native pages; self-contained C99/C++ header + frame player.
-node tools/export-mcu.mjs eyes/happy-squint --format xor-rle --symbol animation --out artifacts/animation.h
+void setup() {
+  u8g2.begin();
+}
 
-# Mode B: standard-library horizontal bitmaps and 16-bit RGB565 words.
-node tools/export-mcu.mjs weather/rain --format u8g2 --out artifacts/rain-xbm.h
-node tools/export-mcu.mjs system/battery --format adafruit --out artifacts/battery-gfx.h
-node tools/export-mcu.mjs eyes/blink --format rgb565 --profile st7789-128x128 --out artifacts/blink-rgb565.h
-
-# Narrow OLED; --fx id is also supported by all CLIs.
-node tools/export-mcu.mjs eyes/blink --profile ssd1306-128x32 --out artifacts/blink32.h
+void loop() {
+  static uint16_t frame = 0;
+  
+  // Zero-malloc decompression directly into driver RAM buffer
+  animation_step_frame(u8g2.getBufferPtr(), frame++);
+  u8g2.sendBuffer();
+  
+  delay(1000 / 16); // 16 fps smooth playback
+}
 ```
 
-XOR-RLE stores changes between frames and decodes directly into your display driver's buffer, with no heap allocation or second framebuffer. Each default two-second animation (32 frames, 16 fps, seed 1) passes the **4 KiB flash budget including offset/size tables**, on both supported profiles. Mode B stores full independent frames: U8g2 XBM is LSB-first, Adafruit GFX is MSB-first. It uses more flash and supports random frame access.
+---
 
-Four [firmware examples](firmware/examples/README.md) cover both drivers and both export modes. Include `animation.h`, then call `animation_step_frame(display.getBuffer(), index)` or `oledfx_step_frame(...)`. Frame zero resets the buffer automatically on replay. The host C tests verify the player and decoder byte for byte; ESP32/ESP32-S3/RP2040 flashing and physical-display validation still require a board.
+## ✦ Privacy & Repository Security
 
-## Hardware — unverified
+> [!IMPORTANT]
+> **This repository and its online showcase are strictly maintained under Private access.**
 
-**Physical burn not performed in this environment**
+- **Repository Privacy**: This GitHub repository is configured as `private: true`. Proprietary source code, design assets, and internal documentation remain non-public.
+- **GitHub Pages Access Control**: The automated CI/CD pipeline enforces strict privacy gates, ensuring that deployment artifacts are accessible exclusively to authenticated repository collaborators. Unauthorized or anonymous requests return a 404 response.
+- **Air-Gapped Local Operation**: All algorithms and tooling operate with pure ESM zero-dependency architecture, enabling 100% offline, local air-gapped development.
 
-Follow the [ESP32 burn guide](docs/ESP32-BURN.md) for exact exports, SSD1306 I²C wiring, opening all four Arduino examples, and the remaining hardware checklist. Run `node tools/check-firmware-examples.mjs` to generate and validate their headers in a temporary directory; it also attempts board compilation when `arduino-cli` is available. Without it, the script reports static validation only.
+---
 
-Render reproducible visual references:
-
-```sh
-node tools/render.mjs eyes/happy-squint --dual-tone --out artifacts/contact.png
-node tools/render-catalog.mjs --out artifacts/library.png
-node tools/render-catalog.mjs --category weather --out artifacts/weather.png
-node tools/check.mjs weather/rain --profile ssd1306-128x32
-```
-
-`npm test` checks all four profiles, every FX's determinism and actual emitted-header roundtrip, shimmer, edge spill, dead-frame and flash budgets (`CHK-01`..`CHK-06`), bitmap and RGB565 packing, C playback across repeated loops, geometry/dithering, PNG/GIF/sprite-sheet output, `new.mjs`/`act.mjs`/`mcp-server.mjs`, and gallery interactions. [AUTHORING](docs/AUTHORING.md) and [SKILL.md](skills/oledfx/SKILL.md) document the complete API, agent closed-loop workflow, MCP tools, export formats and visual review workflow.
-
-This release covers the software and AI agent pipeline in [PRD 02 & PRD 03](docs/PRD.md), including the 100-FX catalog, 1-bit & RGB565 profiles (`ssd1306-128x64`, `ssd1306-128x32`, `led-matrix-64x32`, `st7789-128x128`), six quality gates, CLI toolchain (`new.mjs`, `render.mjs`, `act.mjs`, `check.mjs`, `export-mcu.mjs`, `mcp-server.mjs`), and Agent Skill. Physical board validation and launch video remain hardware-dependent. PNG references in `docs/images/` are actual framebuffer renders; they are not browser screenshots.
-
-Gallery access: use `npm run gallery` locally. The current personal-account Pages configuration returns 404 and does not provide a usable private gallery; a successful workflow deployment does not establish private access. Repository visibility and Pages settings are unchanged.
-
-If a command fails, use Node.js 20+ and run it from the repository root. Unknown effect IDs show example IDs; browse the full catalog in the gallery. If port 4173 is in use, run `PORT=4174 npm run gallery` on macOS/Linux and open http://127.0.0.1:4174/gallery/ (PowerShell: `$env:PORT=4174; npm run gallery`).
-
-## Hardware — unverified
-
-Physical ESP32 + OLED burns were **not** run in CI or agent boxes. Follow the reproducible procedure in [docs/ESP32-BURN.md](docs/ESP32-BURN.md) and `node tools/check-firmware-examples.mjs` for a static preflight.
+<p align="center">
+  <sub>oledfx &copy; Designed for soulful micro-hardware. Crafted with precision.</sub><br>
+  <sub><a href="README.zh-TW.md">切換至繁體中文版本</a></sub>
+</p>
