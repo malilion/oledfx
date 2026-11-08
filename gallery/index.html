@@ -8,7 +8,37 @@
   <link rel="icon" type="image/png" href="./favicon.png" sizes="32x32">
   <link rel="apple-touch-icon" href="./logo.png">
   <link rel="stylesheet" href="./style.css">
+  <script src="./tailwind.min.js"></script>
   <script>
+    if (typeof tailwind !== 'undefined') {
+      tailwind.config = {
+        darkMode: ['selector', '[data-theme="dark"]'],
+        theme: {
+          extend: {
+            colors: {
+              'bg-deep': 'var(--bg-deep)',
+              'bg-chassis': 'var(--bg-chassis)',
+              'bg-module': 'var(--bg-module)',
+              'bg-elevated': 'var(--bg-elevated)',
+              'border-dim': 'var(--border-dim)',
+              'border-machined': 'var(--border-machined)',
+              'border-bright': 'var(--border-bright)',
+              'text-primary': 'var(--text-primary)',
+              'text-secondary': 'var(--text-secondary)',
+              'text-muted': 'var(--text-muted)',
+              'phosphor-cyan': 'var(--phosphor-cyan)',
+              'phosphor-mint': 'var(--phosphor-mint)',
+              'phosphor-yellow': 'var(--phosphor-yellow)',
+              'signal-orange': 'var(--signal-orange)',
+            },
+            fontFamily: {
+              sans: ['var(--font-sans)'],
+              mono: ['var(--font-mono)'],
+            }
+          }
+        }
+      };
+    }
     try {
       const saved = localStorage.getItem('oledfx-theme');
       const theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
