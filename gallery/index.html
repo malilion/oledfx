@@ -8,6 +8,13 @@
   <link rel="icon" type="image/png" href="./favicon.png" sizes="32x32">
   <link rel="apple-touch-icon" href="./logo.png">
   <link rel="stylesheet" href="./style.css">
+  <script>
+    try {
+      const saved = localStorage.getItem('oledfx-theme');
+      const theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (_) {}
+  </script>
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -24,7 +31,12 @@
       <a href="#quickstart">04 QUICKSTART</a>
     </nav>
     <div class="header-meta">
-      <span class="kbd-hint" title="Keyboard shortcuts"><b>SPACE</b> PAUSE · <b>←/→</b> FX · <b>C</b> COPY .H</span>
+      <span class="kbd-hint" title="Keyboard shortcuts"><b>SPACE</b> PAUSE · <b>←/→</b> FX · <b>C</b> COPY .H · <b>T</b> THEME</span>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle light and dark mode" title="Toggle theme (T)">
+        <span class="theme-icon sun" aria-hidden="true">☼</span>
+        <span class="theme-icon moon" aria-hidden="true">☾</span>
+        <span id="theme-text" class="theme-text">DARK</span>
+      </button>
       <span class="tag"><b class="tag-dot"></b>LOCAL DISPLAY LAB</span>
     </div>
   </header>

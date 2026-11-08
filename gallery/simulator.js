@@ -295,6 +295,37 @@ $('#download-header').addEventListener('click', () => {
   $('#export-status').textContent = `${format} · ${compiled.storageBytes.toLocaleString()} flash bytes`;
 });
 
+function getEffectiveTheme() {
+  if (typeof document === 'undefined' || !document.documentElement?.getAttribute) return 'dark';
+  return document.documentElement.getAttribute('data-theme') || 'dark';
+}
+
+function applyTheme(theme) {
+  if (typeof document !== 'undefined' && document.documentElement?.setAttribute) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+  const textEl = $('#theme-text');
+  if (textEl) textEl.textContent = theme === 'light' ? 'LIGHT' : 'DARK';
+  const toggleBtn = $('#theme-toggle');
+  if (toggleBtn?.setAttribute) {
+    toggleBtn.setAttribute('aria-label', `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`);
+  }
+  if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+    try { localStorage.setItem('oledfx-theme', theme); } catch (_) {}
+  }
+}
+
+function toggleTheme() {
+  const current = getEffectiveTheme();
+  applyTheme(current === 'light' ? 'dark' : 'light');
+}
+
+const themeBtn = $('#theme-toggle');
+if (themeBtn?.addEventListener) {
+  themeBtn.addEventListener('click', toggleTheme);
+}
+applyTheme(getEffectiveTheme());
+
 if (typeof window !== 'undefined' && window.addEventListener) {
   window.addEventListener('keydown', event => {
     const tag = event.target?.tagName;
@@ -303,6 +334,7 @@ if (typeof window !== 'undefined' && window.addEventListener) {
     else if (event.key === 'ArrowRight') { event.preventDefault(); $('#next-fx')?.fire ? $('#next-fx').fire('click') : $('#next-fx')?.click?.(); }
     else if (event.key === 'ArrowLeft') { event.preventDefault(); $('#prev-fx')?.fire ? $('#prev-fx').fire('click') : $('#prev-fx')?.click?.(); }
     else if (event.key === 'c' || event.key === 'C') { $('#copy-header')?.click?.(); }
+    else if (event.key === 't' || event.key === 'T') { event.preventDefault(); toggleTheme(); }
     else if (event.key === '/') { event.preventDefault(); $('#search')?.focus?.(); }
   });
 }
