@@ -51,7 +51,9 @@ export function defineEffect(id, name, paint, { duration = 2, loop = true, eyes 
     // flicker on a physical OLED. Both profiles retain the same pixel pitch.
     for (let y = 0; y < fb.height; y += 2) for (let x = 0; x < fb.width; x += 2) {
       const on = getPixel(fb, x, y);
-      fillRect(fb, x, y, 2, 2, on);
+      const w = !id.startsWith('transitions/') && fb.width < 128 && x + 2 >= fb.width ? 1 : 2;
+      const h = !id.startsWith('transitions/') && fb.height < 64 && y + 2 >= fb.height ? 1 : 2;
+      fillRect(fb, x, y, w, h, on);
     }
   };
   const create = (opts = {}) => {

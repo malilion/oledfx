@@ -23,13 +23,15 @@ With Node.js 20+:
 ```sh
 npm test
 npm run check
-node tools/check.mjs eyes/happy-squint
-node tools/render.mjs eyes/happy-squint --dual-tone --out artifacts/contact.png
-# Open artifacts/contact.png for an annotated timeline.
+node tools/check.mjs eyes/happy-squint --json
+node tools/render.mjs eyes/happy-squint --dual-tone --out artifacts/contact.png --gif artifacts/happy-squint.gif --sheet artifacts/happy-squint-sheet.png
+node tools/act.mjs eyes/happy-squint --dual-tone --out artifacts/act.png
+node tools/new.mjs weather/solar-flare --out artifacts/solar-flare.js
+# Open artifacts/contact.png or artifacts/act.png for an annotated timeline.
 npm run gallery
 ```
 
-Open **http://127.0.0.1:4173/gallery/**. The server also opens the gallery at `/`. The SSD1306 simulator has a PCB bezel, mounting holes and I²C pins, pixel pitch, phosphor glow, and the classic yellow top 16 rows / blue lower screen. Switch 128×64 / 128×32, adjust lookX/Y and blink, choose any FX, or browse the searchable animated catalog. Only visible catalog cards animate. Download a PNG or a complete `.h` directly in the browser.
+Open **http://127.0.0.1:4173/gallery/**. The server also opens the gallery at `/`. The display simulator has a PCB bezel, mounting holes and connector pins, pixel pitch, phosphor glow, and the classic yellow top 16 rows / blue lower screen. Switch between `ssd1306-128x64`, `ssd1306-128x32`, `led-matrix-64x32` (HUB75), and `st7789-128x128` (TFT), adjust lookX/Y and blink, choose any FX, or browse the searchable animated catalog. Only visible catalog cards animate. Download a PNG or a complete `.h` directly in the browser.
 
 ```js
 import { createFramebuffer, effects } from './src/index.js';
@@ -42,7 +44,7 @@ eyes.draw(screen);
 eyes.params.lookX = -0.5; // parameters stay live
 ```
 
-The framebuffer supports `fillRect`, `fillCircle`, `fillRoundRect`, `clearRect`, fill, clear and pixel access as methods or standalone functions. Dithering includes threshold, stable Bayer 4×4 and checker patterns. The 128×32 profile uses 512 bytes per frame.
+The framebuffer supports `fillRect`, `fillCircle`, `fillRoundRect`, `clearRect`, fill, clear and pixel access as methods or standalone functions. Dithering includes `threshold`, stable `bayer4x4`, `checker`, and `atkinson` error diffusion. Hardware profiles cover `ssd1306-128x64` (1,024 B), `ssd1306-128x32` (512 B), `led-matrix-64x32` (4,096 B RGB565), and `st7789-128x128` (32,768 B RGB565).
 
 Export for hardware:
 
@@ -50,9 +52,10 @@ Export for hardware:
 # Mode A: compressed native pages; self-contained C99/C++ header + frame player.
 node tools/export-mcu.mjs eyes/happy-squint --format xor-rle --symbol animation --out artifacts/animation.h
 
-# Mode B: standard-library horizontal bitmaps.
+# Mode B: standard-library horizontal bitmaps and 16-bit RGB565 words.
 node tools/export-mcu.mjs weather/rain --format u8g2 --out artifacts/rain-xbm.h
 node tools/export-mcu.mjs system/battery --format adafruit --out artifacts/battery-gfx.h
+node tools/export-mcu.mjs eyes/blink --format rgb565 --profile st7789-128x128 --out artifacts/blink-rgb565.h
 
 # Narrow OLED; --fx id is also supported by all CLIs.
 node tools/export-mcu.mjs eyes/blink --profile ssd1306-128x32 --out artifacts/blink32.h
@@ -77,9 +80,9 @@ node tools/render-catalog.mjs --category weather --out artifacts/weather.png
 node tools/check.mjs weather/rain --profile ssd1306-128x32
 ```
 
-`npm test` checks both profiles, every FX's determinism and actual emitted-header roundtrip, shimmer and flash budgets, bitmap bit ordering, C playback across repeated loops, geometry/dithering, PNGs, and gallery interactions. [AUTHORING](docs/AUTHORING.md) documents the complete API, file layout, shared helpers, fixtures, export formats and visual review workflow.
+`npm test` checks all four profiles, every FX's determinism and actual emitted-header roundtrip, shimmer, edge spill, dead-frame and flash budgets (`CHK-01`..`CHK-06`), bitmap and RGB565 packing, C playback across repeated loops, geometry/dithering, PNG/GIF/sprite-sheet output, `new.mjs`/`act.mjs`/`mcp-server.mjs`, and gallery interactions. [AUTHORING](docs/AUTHORING.md) and [SKILL.md](skills/oledfx/SKILL.md) document the complete API, agent closed-loop workflow, MCP tools, export formats and visual review workflow.
 
-This release covers the SSD1306 software pipeline in [PRD 02](docs/PRD.md), including the 100-FX catalog. RGB565/HUB75/ST7789 renderers, physical board validation and launch video remain future work. PNG references in `docs/images/` are actual framebuffer renders; they are not browser screenshots.
+This release covers the software and AI agent pipeline in [PRD 02 & PRD 03](docs/PRD.md), including the 100-FX catalog, 1-bit & RGB565 profiles (`ssd1306-128x64`, `ssd1306-128x32`, `led-matrix-64x32`, `st7789-128x128`), six quality gates, CLI toolchain (`new.mjs`, `render.mjs`, `act.mjs`, `check.mjs`, `export-mcu.mjs`, `mcp-server.mjs`), and Agent Skill. Physical board validation and launch video remain hardware-dependent. PNG references in `docs/images/` are actual framebuffer renders; they are not browser screenshots.
 
 Gallery access: use `npm run gallery` locally. The current personal-account Pages configuration returns 404 and does not provide a usable private gallery; a successful workflow deployment does not establish private access. Repository visibility and Pages settings are unchanged.
 

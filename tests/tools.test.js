@@ -8,7 +8,11 @@ import { exportMCU } from '../tools/export-mcu.mjs';
 import { decoderSource } from '../tools/mcu-format.mjs';
 import { checkSequence, headerRoundtrip } from '../tools/check.mjs';
 import { loadSequence, sampleEffect, parseArgs } from '../tools/sequence.mjs';
-import { contactSheet } from '../tools/render.mjs';
+import { contactSheet, spriteSheet } from '../tools/render.mjs';
+import { encodeGIF } from '../src/core/gif.js';
+import { scaffoldEffect, createEffectFile } from '../tools/new.mjs';
+import { actionStrip } from '../tools/act.mjs';
+import { mcpTools, handleMCPRequest } from '../tools/mcp-server.mjs';
 import { handleGalleryRequest } from '../gallery/serve.mjs';
 
 async function temporary(fn) {
@@ -95,7 +99,58 @@ test('check detects nondeterminism, forbidden random, flicker and exceeded budge
   assert.equal(flicker.checks[1].pass, false); assert.ok(flicker.flicker.reversals > 0);
   const large = await checkSequence(() => sampleEffect(), { budget: 1, headerBudget: 1 });
   assert.equal(large.checks[2].pass, false);
+  const spilled = await checkSequence(() => ({
+    name: 'eyes/spilled', width: 16, height: 16, fps: 16,
+    frames: [new Uint8Array(32).fill(255), new Uint8Array(32).fill(255), new Uint8Array(32).fill(255), new Uint8Array(32).fill(255)]
+  }));
+  assert.equal(spilled.checks[4].pass, false);
+  assert.equal(spilled.checks.length, 6);
 });
+
+test('contact sheet, sprite sheet, GIF89a, act strip, new scaffold and MCP server work end-to-end', async () => temporary(async dir => {
+  const seq = sampleEffect({ fx: 'eyes/happy-squint', frames: 8, fps: 8 });
+  const { image, atlas } = spriteSheet(seq, { scale: 1, columns: 4 });
+  assert.equal(image.width, 512); assert.equal(image.height, 128);
+  assert.equal(atlas.frames.length, 8);
+  assert.equal(atlas.meta.effect, 'eyes/happy-squint');
+
+  const gif = encodeGIF(seq, { scale: 2, dualTone: true });
+  assert.equal(gif.subarray(0, 6).toString('ascii'), 'GIF89a');
+  assert.equal(gif.at(-1), 0x3b);
+
+  const strip = actionStrip(seq, { scale: 2, columns: 4, dualTone: true });
+  assert.ok(strip.width > 0 && strip.height > 0);
+
+  const pureFile = join(dir, 'solar-flare.js');
+  await createEffectFile({ id: 'weather/solar-flare', out: pureFile });
+  const simSource = scaffoldEffect({ id: 'eyes/cyber-wink', sim: true });
+  assert.match(simSource, /mulberry32/);
+  await assert.rejects(createEffectFile({ id: 'weather/solar-flare', out: pureFile }), /already exists/);
+  assert.throws(() => scaffoldEffect({ id: 'invalid/name' }), /Unknown category/);
+
+  const init = await handleMCPRequest({ id: 1, method: 'initialize' });
+  assert.equal(init.result.serverInfo.name, 'oledfx-mcp');
+  const list = await handleMCPRequest({ id: 2, method: 'tools/list' });
+  assert.equal(list.result.tools.length, 4);
+  assert.deepEqual(mcpTools.map(t => t.name), ['fx_search_catalog', 'fx_render_contact_sheet', 'fx_run_diagnostics', 'fx_export_asset']);
+
+  const search = await handleMCPRequest({ id: 3, method: 'tools/call', params: { name: 'fx_search_catalog', arguments: { query: 'squint', category: 'eyes' } } });
+  assert.match(search.result.content[0].text, /eyes\/happy-squint/);
+
+  const rendered = await handleMCPRequest({ id: 4, method: 'tools/call', params: { name: 'fx_render_contact_sheet', arguments: { effect_id: 'eyes/blink', palette: 'dual-tone' } } });
+  assert.equal(rendered.result.content[1].mimeType, 'image/png');
+
+  const diag = await handleMCPRequest({ id: 5, method: 'tools/call', params: { name: 'fx_run_diagnostics', arguments: { effect_id: 'eyes/blink' } } });
+  assert.equal(JSON.parse(diag.result.content[0].text).pass, true);
+
+  const exported = await handleMCPRequest({ id: 6, method: 'tools/call', params: { name: 'fx_export_asset', arguments: { effect_id: 'eyes/blink', target_format: 'rgb565', profile: 'led-matrix-64x32' } } });
+  assert.equal(JSON.parse(exported.result.content[0].text).format, 'rgb565');
+
+  const skill = await readFile(new URL('../skills/oledfx/SKILL.md', import.meta.url), 'utf8');
+  assert.match(skill, /name: oledfx-author/);
+  const plugin = JSON.parse(await readFile(new URL('../.claude-plugin/plugin.json', import.meta.url), 'utf8'));
+  assert.equal(plugin.name, 'oledfx');
+}));
 
 test('contact sheet composes grid, annotations and multiple frame samples', () => {
   const image = contactSheet(sampleEffect(), { scale: 2, columns: 2, samples: 4, dualTone: true });

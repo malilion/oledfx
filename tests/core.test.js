@@ -44,6 +44,9 @@ test('dither modes are deterministic, saturated, and spatially anchored', () => 
     assert.equal(count, level);
   }
   assert.deepEqual([checker(0.5, 0, 0), checker(0.5, 1, 0), checker(0.5, 0, 1)], [1, 0, 0]);
+  const atk = createFramebuffer(8, 8);
+  dither(atk, () => 0.4, 'atkinson');
+  assert.ok(fillRate(atk) > 0 && fillRate(atk) < 0.5);
   assert.throws(() => dither(createFramebuffer(), [], 'diffusion'));
   assert.throws(() => dither(createFramebuffer(), []));
 });
@@ -61,6 +64,13 @@ test('display profiles define immutable hardware sizes and page boundaries', () 
     fb.setPixel(127, height - 1, 1.0);
     assert.equal(fb.data.at(-1), 128);
     assert.equal(fb.getPixel(127, height - 1), 1);
+  }
+  for (const [id, w, h, frameBytes] of [['led-matrix-64x32', 64, 32, 4096], ['st7789-128x128', 128, 128, 32768]]) {
+    const profile = getProfile(id), fb = createFramebuffer(id);
+    assert.deepEqual(profile, { w, h, depth: 16, pageBytes: w, frameBytes });
+    assert.ok(Object.isFrozen(profile));
+    assert.equal(fb.width, w); assert.equal(fb.height, h);
+    assert.equal(fb.data.length, w * h / 8);
   }
   assert.ok(Object.isFrozen(profiles));
   for (const id of ['ssd1306-64x64', 'toString', '__proto__']) {

@@ -20,7 +20,7 @@ test('every category module is registered exactly once, with immutable public me
   assert.ok(catalog.every(meta => Object.isFrozen(meta)));
 });
 
-for (const profile of ['ssd1306-128x64', 'ssd1306-128x32']) {
+for (const profile of ['ssd1306-128x64', 'ssd1306-128x32', 'led-matrix-64x32', 'st7789-128x128']) {
   test(`all 100 FX pass check (determinism, shimmer, budgets, actual header roundtrip): ${profile}`, async () => {
     for (const fx of Object.keys(effects)) {
       const result = await checkSequence(() => sampleEffect({ fx, profile }));

@@ -1,5 +1,5 @@
 // Node CLI facade; the header compiler also works directly in the browser.
-export { buildHeader, buildBitmapHeader, packBitmap } from '../src/core/mcu.js';
+export { buildHeader, buildBitmapHeader, buildRGB565Header, packBitmap, packRGB565, rgb565 } from '../src/core/mcu.js';
 
 export const decoderSource = `/* oledfx XOR-RLE: persistent SSD1306 page-packed buffer; no allocation.
  * Zero buffer before frame 0. Reset before replay; feed frames in order.

@@ -3,59 +3,311 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>oledfx — 微螢幕程序化動畫</title>
+  <title>oledfx — 微螢幕程序化動畫與硬體編譯實驗室</title>
   <link rel="icon" href="./favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="./favicon.png" sizes="32x32">
   <link rel="apple-touch-icon" href="./logo.png">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <header><a class="brand" href="./"><img class="brand-logo" src="./logo.svg" width="36" height="36" alt="oledfx"> oled<span>fx</span><i></i></a><span class="tag">LOCAL DISPLAY LAB</span></header>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <header>
+    <a class="brand" href="./">
+      <img class="brand-logo" src="./logo.svg" width="36" height="36" alt="oledfx">
+      oled<span>fx</span><i></i>
+      <em class="brand-sub">FIELD LAB // REV 2.4</em>
+    </a>
+    <nav class="header-nav" aria-label="Section navigation">
+      <a href="#workbench">01 WORKBENCH</a>
+      <a href="#pipeline">02 PIPELINE</a>
+      <a href="#matrix">03 100-FX MATRIX</a>
+      <a href="#quickstart">04 QUICKSTART</a>
+    </nav>
+    <div class="header-meta">
+      <span class="kbd-hint" title="Keyboard shortcuts"><b>SPACE</b> PAUSE · <b>←/→</b> FX · <b>C</b> COPY .H</span>
+      <span class="tag"><b class="tag-dot"></b>LOCAL DISPLAY LAB</span>
+    </div>
+  </header>
+
   <main>
-    <div class="intro"><p class="eyebrow">128 × 64 PIXELS. A LITTLE PERSONALITY.</p><h1>小螢幕，有表情。</h1><p>100 procedural animations. Five tiny worlds. One bit of personality.</p><div class="stats"><span><b>25</b> expressions</span><span><b>75</b> weather, status & desk FX</span><span><b>0</b> runtime dependencies</span></div></div>
-    <div class="workspace">
+    <div class="intro">
+      <div class="intro-top">
+        <p class="eyebrow">128 × 64 PIXELS. A LITTLE PERSONALITY.</p>
+        <span class="spec-serial">MODEL OFX-100 · ZERO-MALLOC C99 ENGINE · DETERMINISTIC PRNG</span>
+      </div>
+      <div class="intro-hero">
+        <div>
+          <h1>小螢幕，有表情。<span class="hero-sub">Tiny Screens. Living Expressions.</span></h1>
+          <p class="intro-lead">100 procedural animations. Five tiny worlds. One bit of personality. Author and tune a real 1-bit or RGB565 framebuffer in the browser, inspect frame-by-frame XOR deltas, and compile a zero-malloc C header for ESP32, RP2040, or Arduino in one click.</p>
+        </div>
+        <div class="hero-actions">
+          <a href="#matrix" class="btn-primary">Explore 100 FX ↓</a>
+          <button type="button" id="hero-copy-h" class="btn-secondary">Copy Active .h ⎘</button>
+        </div>
+      </div>
+      <div class="stats">
+        <span><b>25</b> expressions <small>LIVE GAZE X/Y + BLINK</small></span>
+        <span><b>75</b> weather, status &amp; desk FX <small>5 PROCEDURAL PACKS</small></span>
+        <span><b>&lt; 4 KB</b> flash budget <small>88%+ XOR-RLE SAVED</small></span>
+        <span><b>0</b> runtime dependencies <small>PURE ESM + C99 HEADER</small></span>
+      </div>
+    </div>
+
+    <div id="workbench" class="workspace">
       <section class="preview" aria-label="OLED simulator">
-        <div class="preview-top"><span><i class="status"></i> LIVE PREVIEW</span><span id="fx-name">Curious eyes</span></div>
-        <div class="display-wrap"><div class="board glowing">
-          <div class="mount top-left" aria-hidden="true"></div><div class="mount top-right" aria-hidden="true"></div>
-          <div class="mount bottom-left" aria-hidden="true"></div><div class="mount bottom-right" aria-hidden="true"></div>
-          <div class="bezel"><div class="screen"><canvas width="640" height="320" aria-label="Animated OLED eyes; move pointer to change gaze"></canvas></div></div>
-          <div class="board-label"><span>oledfx <small>SSD1306</small></span><span id="board-size">128×64 / I²C</span></div>
-          <div class="connector" aria-label="I²C connector: GND VCC SCL SDA"><span>GND<i></i></span><span>VCC<i></i></span><span>SCL<i></i></span><span>SDA<i></i></span></div>
-        </div></div>
-        <div class="preview-bottom"><span id="position">X +0.00 &nbsp; Y +0.00</span><button id="pause" type="button">Pause</button><span id="clock">0.00 s</span></div>
+        <div class="preview-top">
+          <span><i class="status"></i> LIVE PREVIEW <strong class="preview-mode-tag" id="preview-mode-tag">REALTIME 16 FPS</strong></span>
+          <div class="preview-top-right">
+            <span class="telemetry-pill" id="telemetry-badge">XOR-RLE · &lt; 4 KB</span>
+            <span id="fx-name">Curious eyes</span>
+          </div>
+        </div>
+
+        <div class="display-wrap" id="display-stage">
+          <div class="stage-crosshair tl" aria-hidden="true"></div>
+          <div class="stage-crosshair tr" aria-hidden="true"></div>
+          <div class="stage-crosshair bl" aria-hidden="true"></div>
+          <div class="stage-crosshair br" aria-hidden="true"></div>
+          <div class="board glowing">
+            <div class="mount top-left" aria-hidden="true"></div>
+            <div class="mount top-right" aria-hidden="true"></div>
+            <div class="mount bottom-left" aria-hidden="true"></div>
+            <div class="mount bottom-right" aria-hidden="true"></div>
+            <div class="pcb-silkscreen" aria-hidden="true">
+              <span>U1 · OLED-DRV</span>
+              <span>C1 100nF · R1 4.7K</span>
+              <span>ADDR 0x3C</span>
+            </div>
+            <div class="bezel">
+              <div class="screen">
+                <canvas width="640" height="320" aria-label="Animated OLED eyes; move pointer to change gaze"></canvas>
+              </div>
+            </div>
+            <div class="board-label">
+              <span>oledfx <small>SSD1306</small></span>
+              <span id="board-size">128×64 / I²C</span>
+            </div>
+            <div class="connector" aria-label="I²C connector: GND VCC SCL SDA">
+              <span>GND<i></i></span><span>VCC<i></i></span><span>SCL<i></i></span><span>SDA<i></i></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="telemetry-bar" aria-label="Live framebuffer telemetry">
+          <div class="telemetry-cell">
+            <span class="t-label">ACTIVE FILL</span>
+            <strong id="telemetry-fill">12.4%</strong>
+            <div class="t-meter"><i id="meter-fill" style="width:24%"></i></div>
+          </div>
+          <div class="telemetry-cell">
+            <span class="t-label">XOR DELTA / STEP</span>
+            <strong id="telemetry-delta">1.8% · STEP</strong>
+            <div class="t-meter"><i id="meter-delta" class="amber" style="width:18%"></i></div>
+          </div>
+          <div class="telemetry-cell">
+            <span class="t-label">FLASH FOOTPRINT</span>
+            <strong id="telemetry-flash">1,420 B / 4,096 B</strong>
+            <div class="t-meter"><i id="meter-flash" style="width:35%"></i></div>
+          </div>
+          <div class="telemetry-cell">
+            <span class="t-label">FRAME CURSOR</span>
+            <strong id="telemetry-frame">F00 / 31</strong>
+            <input id="frame-scrubber" class="scrubber" type="range" min="0" max="31" step="1" value="0" aria-label="Scrub animation frame">
+          </div>
+        </div>
+
+        <div class="preview-bottom">
+          <span id="position">X +0.00 &nbsp; Y +0.00</span>
+          <div class="transport-controls">
+            <button id="step-prev" type="button" class="btn-icon" title="Step back 1 frame">⏮ -1F</button>
+            <button id="pause" type="button">Pause</button>
+            <button id="step-next" type="button" class="btn-icon" title="Step forward 1 frame">+1F ⏭</button>
+            <div class="speed-group" role="group" aria-label="Playback speed">
+              <button type="button" class="speed-btn" data-speed="0.25">0.25×</button>
+              <button type="button" class="speed-btn" data-speed="0.5">0.5×</button>
+              <button type="button" class="speed-btn active" data-speed="1">1×</button>
+              <button type="button" class="speed-btn" data-speed="2">2×</button>
+            </div>
+          </div>
+          <span id="clock">0.00 s</span>
+        </div>
+
+        <div class="inspector-drawer">
+          <div class="inspector-header">
+            <div class="inspector-tabs" role="tablist" aria-label="Code inspector mode">
+              <button type="button" class="insp-tab active" data-tab="header">C99 Header (.h)</button>
+              <button type="button" class="insp-tab" data-tab="Arduino">ESP32 Sketch (.ino)</button>
+              <button type="button" class="insp-tab" data-tab="esm">ESM Runtime (.js)</button>
+            </div>
+            <div class="inspector-actions">
+              <span id="inspector-meta" class="inspector-meta">PROGMEM · 0 B HEAP</span>
+              <button type="button" id="copy-code" class="btn-copy">Copy Code ⎘</button>
+            </div>
+          </div>
+          <pre class="inspector-code"><code id="code-preview">/* Loading live hardware preview... */</code></pre>
+        </div>
       </section>
-      <aside>
-        <p class="eyebrow">01 / EXPRESSION</p>
-        <label class="profile-label" for="fx-picker">Animation library <span id="fx-count">100 FX</span></label>
-        <select id="fx-picker" aria-label="Choose animation"></select>
-        <div class="effects"><button type="button" class="effect active" data-fx="eyes/blink" aria-pressed="true"><span>01</span> Curious eyes <b>● ●</b></button><button type="button" class="effect" data-fx="eyes/happy-squint" aria-pressed="false"><span>02</span> Happy squint <b>⌒ ⌒</b></button></div>
-        <p class="eyebrow section-label">02 / DISPLAY</p>
-        <label class="profile-label" for="profile">Hardware profile</label>
-        <select id="profile"><option value="ssd1306-128x64">SSD1306 · 128 × 64</option><option value="ssd1306-128x32">SSD1306 · 128 × 32</option></select>
-        <label class="toggle">Yellow / blue split (top 16px)<input id="dual-tone" type="checkbox" checked></label>
-        <label class="toggle">Pixel grid<input id="grid" type="checkbox" checked></label>
-        <label class="toggle">Soft glow<input id="glow" type="checkbox" checked></label>
-        <p class="eyebrow section-label">03 / GAZE</p>
-        <label class="range">Horizontal<input id="look-x" type="range" min="-1" max="1" step="0.01" value="0"></label>
-        <label class="range">Vertical<input id="look-y" type="range" min="-1" max="1" step="0.01" value="0"></label>
-        <label class="range" id="blink-label">Blink <span>auto → closed</span><input id="blink" type="range" min="0" max="1" step="0.01" value="0"></label>
-        <button id="reset" class="reset" type="button">Reset gaze ↗</button>
-        <p class="eyebrow section-label">04 / TAKE IT TO HARDWARE</p>
-        <label class="profile-label" for="export-format">Header format</label>
-        <select id="export-format"><option value="xor-rle">XOR-RLE · compressed</option><option value="u8g2">U8g2 · XBM</option><option value="adafruit">Adafruit GFX · bitmap</option></select>
-        <div class="export-actions"><button id="download-header" type="button">Download .h ↓</button><button id="download-png" type="button">PNG ↓</button></div>
-        <p id="export-status" role="status" class="export-status">32 frames · 16 fps · browser export</p>
+
+      <aside aria-label="Instrument control rack">
+        <div class="rack-module">
+          <div class="rack-head">
+            <p class="eyebrow">01 / EXPRESSION</p>
+            <div class="fx-stepper">
+              <button type="button" id="prev-fx" title="Previous animation (←)">←</button>
+              <button type="button" id="next-fx" title="Next animation (→)">→</button>
+            </div>
+          </div>
+          <label class="profile-label" for="fx-picker">Animation library <span id="fx-count">100 FX</span></label>
+          <select id="fx-picker" aria-label="Choose animation"></select>
+          <div class="effects">
+            <button type="button" class="effect active" data-fx="eyes/blink" aria-pressed="true"><span>01</span> Curious eyes <b>● ●</b></button>
+            <button type="button" class="effect" data-fx="eyes/happy-squint" aria-pressed="false"><span>02</span> Happy squint <b>⌒ ⌒</b></button>
+          </div>
+        </div>
+
+        <div class="rack-module">
+          <p class="eyebrow section-label">02 / DISPLAY</p>
+          <label class="profile-label" for="profile">Hardware profile</label>
+          <select id="profile">
+            <option value="ssd1306-128x64">SSD1306 · 128 × 64</option>
+            <option value="ssd1306-128x32">SSD1306 · 128 × 32</option>
+            <option value="led-matrix-64x32">HUB75 · 64 × 32 RGB</option>
+            <option value="st7789-128x128">ST7789 · 128 × 128 TFT</option>
+          </select>
+          <label class="toggle">Yellow / blue split (top 16px)<input id="dual-tone" type="checkbox" checked></label>
+          <label class="toggle">Pixel grid<input id="grid" type="checkbox" checked></label>
+          <label class="toggle">Soft glow<input id="glow" type="checkbox" checked></label>
+        </div>
+
+        <div class="rack-module">
+          <p class="eyebrow section-label">03 / GAZE &amp; PARAMETER</p>
+          <label class="range">Horizontal<input id="look-x" type="range" min="-1" max="1" step="0.01" value="0"></label>
+          <label class="range">Vertical<input id="look-y" type="range" min="-1" max="1" step="0.01" value="0"></label>
+          <label class="range" id="blink-label">Blink <span>auto → closed</span><input id="blink" type="range" min="0" max="1" step="0.01" value="0"></label>
+          <button id="reset" class="reset" type="button">Reset gaze ↗</button>
+        </div>
+
+        <div class="rack-module rack-export">
+          <p class="eyebrow section-label">04 / TAKE IT TO HARDWARE</p>
+          <label class="profile-label" for="export-format">Header format</label>
+          <select id="export-format">
+            <option value="xor-rle">XOR-RLE · compressed</option>
+            <option value="u8g2">U8g2 · XBM</option>
+            <option value="adafruit">Adafruit GFX · bitmap</option>
+            <option value="rgb565">RGB565 · 16-bit TFT/HUB75</option>
+          </select>
+          <div class="export-actions">
+            <button id="download-header" type="button">Download .h ↓</button>
+            <button id="copy-header" type="button" class="btn-secondary-sm">Copy .h ⎘</button>
+            <button id="download-png" type="button">PNG ↓</button>
+          </div>
+          <p id="export-status" role="status" class="export-status">32 frames · 16 fps · browser export</p>
+        </div>
       </aside>
     </div>
-    <section class="library" aria-label="Animation catalog">
-      <div class="library-heading"><div><p class="eyebrow">THE PIXEL COLLECTION</p><h2>Find your next little thing.</h2></div><label class="search-label">Find an animation<input id="search" type="search" placeholder="Search 100 animations…"></label></div>
+
+    <section id="pipeline" class="pipeline-section" aria-label="Hardware compilation pipeline">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">ENGINEERING ARCHITECTURE // ZERO-DEPENDENCY PIPELINE</p>
+          <h2>From 10 lines of JS to a 2 KB ESP32 header.</h2>
+        </div>
+        <span class="spec-pill">CHK-01 .. CHK-06 VERIFIED</span>
+      </div>
+      <div class="pipeline-grid">
+        <article class="pipe-card">
+          <div class="pipe-step">STAGE 01 // AUTHOR</div>
+          <h3>Procedural 1-Bit &amp; RGB565 Core</h3>
+          <p>Seeded <code>mulberry32</code> PRNG and 2×2 pixel-cell quantization keep silhouettes crisp on tiny 0.96&quot; OLEDs while eliminating isolated single-pixel temporal shimmer.</p>
+          <div class="pipe-metric"><span>DITHER MODES</span><b>Threshold · Bayer 4×4 · Checker · Atkinson</b></div>
+        </article>
+        <article class="pipe-card">
+          <div class="pipe-step">STAGE 02 // COMPRESS</div>
+          <h3>XOR-Delta + Run-Length Encoding</h3>
+          <p>Adjacent frames are XOR-diffed in native SSD1306 vertical page order. Unchanged regions collapse into single-byte zero-skip tokens, shrinking 32KB raw animations under 2 KB.</p>
+          <div class="pipe-bars">
+            <div class="bar-row"><span>Raw 32 Frames</span><i class="bar-raw"></i><b>32,768 B</b></div>
+            <div class="bar-row"><span>oledfx XOR-RLE</span><i class="bar-rle"></i><b class="accent">~1,680 B (-94%)</b></div>
+          </div>
+        </article>
+        <article class="pipe-card">
+          <div class="pipe-step">STAGE 03 // FLASH &amp; PLAY</div>
+          <h3>Zero-Malloc C99 Frame Player</h3>
+          <p>Decodes directly into your display driver’s existing framebuffer (<code>display.getBuffer()</code> or <code>u8g2.getBufferPtr()</code>) with 0 bytes of heap allocation and atomic bounds verification.</p>
+          <div class="pipe-metric"><span>TARGETS</span><b>ESP32 · ESP32-S3 · RP2040 · STM32 · AVR</b></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="matrix" class="library" aria-label="Animation catalog">
+      <div class="library-heading">
+        <div>
+          <p class="eyebrow">THE PIXEL COLLECTION // 100 PROCEDURAL MODULES</p>
+          <h2>Find your next little thing.</h2>
+        </div>
+        <div class="library-controls">
+          <button type="button" id="catalog-tone" class="tone-btn" aria-pressed="true" title="Toggle catalog dual-tone vs monochrome">◐ Dual-Tone</button>
+          <div class="density-group" role="group" aria-label="Catalog grid density">
+            <button type="button" class="density-btn" data-cols="5" title="Compact 5 columns">5×</button>
+            <button type="button" class="density-btn active" data-cols="4" title="Standard 4 columns">4×</button>
+            <button type="button" class="density-btn" data-cols="2" title="Studio 2 columns">2×</button>
+          </div>
+          <label class="search-label">Find an animation (press <code>/</code>)<input id="search" type="search" placeholder="Search 100 animations…"></label>
+        </div>
+      </div>
       <div id="categories" class="category-tabs" aria-label="Filter category"></div>
       <div id="catalog" class="catalog"></div>
       <p id="empty" hidden>No animations match. Try another search.</p>
     </section>
-    <footer><span><i class="status"></i> Procedural. Deterministic. Tiny.</span><span>SSD1306 → XOR-RLE → .h</span></footer>
+
+    <section id="quickstart" class="quickstart-section" aria-label="Developer quickstart">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">DEVELOPER &amp; AI AGENT WORKFLOW</p>
+          <h2>Built for makers, firmware engineers, and multimodal AI agents.</h2>
+        </div>
+      </div>
+      <div class="quickstart-grid">
+        <div class="code-card">
+          <div class="code-card-head"><span>01 / BROWSER OR NODE ESM</span><small>Zero npm dependencies</small></div>
+          <pre><code>import { createFramebuffer, effects } from './src/index.js';
+
+const screen = createFramebuffer('ssd1306-128x64');
+const fx = effects['eyes/happy-squint'].create({
+  seed: 1, lookX: 0.4, lookY: -0.2
+});
+fx.step(1 / 16);
+fx.draw(screen); // screen.data -> 1024-byte SSD1306 buffer</code></pre>
+        </div>
+        <div class="code-card">
+          <div class="code-card-head"><span>02 / HARDWARE C HEADER CLI</span><small>Mode A (XOR-RLE) &amp; Mode B (XBM/GFX/RGB565)</small></div>
+          <pre><code># Self-contained C99 XOR-RLE header (&lt; 4 KB Flash)
+node tools/export-mcu.mjs eyes/happy-squint \
+  --format xor-rle --symbol animation --out animation.h
+
+# Standard U8g2 / Adafruit GFX / 16-bit RGB565
+node tools/export-mcu.mjs weather/rain --format u8g2 --out rain.h
+node tools/export-mcu.mjs eyes/blink --format rgb565 --profile st7789-128x128</code></pre>
+        </div>
+        <div class="code-card">
+          <div class="code-card-head"><span>03 / AI AGENT VISUAL CLOSED-LOOP</span><small>Draft → Check → Render → Inspect</small></div>
+          <pre><code># Scaffold, run 6 quality gates, and render timelines
+node tools/new.mjs weather/solar-flare
+node tools/check.mjs weather/solar-flare --json
+node tools/render.mjs weather/solar-flare --dual-tone --gif out.gif
+node tools/act.mjs weather/solar-flare --fps 12</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span><i class="status"></i> Procedural. Deterministic. Tiny. <b>oledfx v0.1.0</b></span>
+      <span>SSD1306 · HUB75 · ST7789 → XOR-RLE / RGB565 → .h</span>
+    </footer>
   </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden>Copied to clipboard</div>
+
   <script type="module" src="./simulator.js"></script>
   <script type="module" src="./catalog.js"></script>
 </body>

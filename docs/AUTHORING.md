@@ -118,11 +118,14 @@ Profiles are frozen and unknown IDs throw:
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `ssd1306-128x64` (default) | 128 | 64 | 1 | 128 | 1024 |
 | `ssd1306-128x32` | 128 | 32 | 1 | 128 | 512 |
+| `led-matrix-64x32` | 64 | 32 | 16 | 64 | 4096 |
+| `st7789-128x128` | 128 | 128 | 16 | 128 | 32768 |
 
 `dither(fb, source, mode)` accepts row-major luminance or `(x,y)=>0..1`:
 threshold uses >=0.5; `bayer4x4` has 17 ordered levels via round(value×16);
-checker has 3 levels via round(value×2). Use spatially fixed patterns, never
-frame-dependent noise or temporal error diffusion.
+checker has 3 levels via round(value×2); `atkinson` distributes 1/8 quantization
+error across 6 neighbors for static halftones. Use spatially fixed patterns for
+animations, never frame-dependent noise or temporal error diffusion.
 
 `renderRGBA(fb, { scale, grid, glow, dualTone, split })` returns
 `{ width, height, data }`. Scale is integer 1..16. Yellow/blue split defaults to
@@ -156,6 +159,16 @@ The domain checks are:
   and `--header-budget` for intentionally larger animations.
 - CHK-04: parse actual generated `.h` arrays, decode every delta and compare
   every byte with the sampled input.
+- CHK-05: outer 1px border spill rate `<= 1.5%` (transitions exempt) and
+  non-empty / non-overexposed active fill (`0.2% <= peak fill <= 85%`, tail
+  blank frames `<= 15%`).
+- CHK-06: per-frame execution budget (`<= 3.0 ms`).
+
+Additional Agent closed-loop tools:
+- `node tools/new.mjs <category>/<name> [--sim]`: generate a compliant effect scaffold.
+- `node tools/act.mjs <id> [--fps 12]`: render a continuous 12fps action strip with `HOLD`/`STEP`/`BURST` delta tags.
+- `node tools/render.mjs <id> [--sheet out.png] [--gif out.gif]`: export sprite sheets (+ JSON atlas) and animated GIF89a previews.
+- `node tools/mcp-server.mjs`: stdio JSON-RPC 2.0 MCP server exposing `fx_search_catalog`, `fx_render_contact_sheet`, `fx_run_diagnostics`, and `fx_export_asset`.
 
 The catalog tests run these checks on every FX and both profiles. Tests also
 verify gaze boundaries, deterministic motion, pure seeking, loop wrap, emitted

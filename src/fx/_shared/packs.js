@@ -375,14 +375,22 @@ export function paintDesk(style, d, p, opts) {
 export function paintTransition(style, d, p, opts, fb) {
   // Ping-pong preview returns to its initial state; progress overrides for UI use.
   const progress = clamp(opts.progress ?? (1 - Math.cos(p * TAU)) / 2);
+  const h = fb.height > 64 && opts.progress === undefined ? 64 : fb.height;
+  const y0 = (fb.height - h) >> 1;
   if (style === 'crt') {
-    const h = Math.max(2, Math.round(48 * (1 - progress) / 16) * 16), w = Math.max(4, Math.round(104 * (1 - Math.max(0, progress - 0.7) / 0.3) / 8) * 8);
-    d.rect(64 - w / 2, 32 - h / 2, w, h);
-    if (h > 8) for (let i = 0; i < 7; i++) d.rect(20, 13 + i * 6, 88, 2, 0);
+    const ch = Math.max(2, Math.round(48 * (1 - progress) / 16) * 16), w = Math.max(4, Math.round(104 * (1 - Math.max(0, progress - 0.7) / 0.3) / 8) * 8);
+    d.rect(64 - w / 2, 32 - ch / 2, w, ch);
+    if (ch > 8) for (let i = 0; i < 7; i++) d.rect(20, 13 + i * 6, 88, 2, 0);
   }
-  if (style === 'blinds') for (let i = 0; i < 4; i++) fb.fillRect(i * fb.width / 4, 0, Math.ceil(fb.width / 4 * progress), fb.height);
-  if (style === 'wipe') fb.fillRect(0, 0, Math.ceil(fb.width * progress), fb.height);
-  if (style === 'iris' && progress > 0) fb.fillCircle(fb.width / 2, fb.height / 2, progress * Math.ceil(Math.hypot(fb.width, fb.height) / 2));
+  if (style === 'blinds') {
+    const bw = h < fb.height ? Math.round(fb.width / 16 * progress) * 4 : Math.ceil(fb.width / 4 * progress);
+    for (let i = 0; i < 4; i++) fb.fillRect(i * fb.width / 4, y0, bw, h);
+  }
+  if (style === 'wipe') fb.fillRect(0, y0, Math.ceil(fb.width * progress), h);
+  if (style === 'iris' && progress > 0) {
+    if (h < fb.height) d.circle(64, 32, Math.round(progress * 10) * 4);
+    else fb.fillCircle(fb.width / 2, fb.height / 2, progress * Math.ceil(Math.hypot(fb.width, fb.height) / 2));
+  }
   if (style === 'radar') {
     d.arc(64, 32, 27, 0, TAU); d.arc(64, 32, 15, 0, TAU);
     d.line(64, 32, 64 + 26 * Math.cos(p * TAU), 32 + 26 * Math.sin(p * TAU), 3);
@@ -392,19 +400,19 @@ export function paintTransition(style, d, p, opts, fb) {
   if (style === 'pixels') {
     // Coarse 16px tiles keep XOR deltas sparse and under the 4KB flash budget.
     const rand = mulberry32(opts.seed ?? 1);
-    for (let y = 0; y < fb.height; y += 16) for (let x = 0; x < fb.width; x += 16) if (rand() < progress) fb.fillRect(x, y, 16, 16);
+    for (let y = y0; y < y0 + h; y += 16) for (let x = 0; x < fb.width; x += 16) if (rand() < progress) fb.fillRect(x, y, 16, 16);
   }
   if (style === 'spiral') {
     for (let i = 0; i < 40 * progress; i++) { const a = i * 0.35, r = i * 0.9; d.rect(64 + Math.cos(a) * r, 32 + Math.sin(a) * r, 3, 3); }
   }
   if (style === 'checker') {
     const rows = Math.round(progress * 8);
-    for (let y = 0; y < rows * 8 && y < fb.height; y += 8) for (let x = 0; x < fb.width; x += 8) {
-      if (((x + y) / 8) % 2 === 0) fb.fillRect(x, y, 8, 8);
+    for (let y = y0; y < y0 + rows * 8 && y < y0 + h; y += 8) for (let x = 0; x < fb.width; x += 8) {
+      if (((x + y - y0) / 8) % 2 === 0) fb.fillRect(x, y, 8, 8);
     }
   }
   if (style === 'bars') {
-    for (let i = 0; i < 8; i++) fb.fillRect(0, i * 8, Math.ceil(fb.width * Math.min(1, progress * 1.4 - i * 0.05)), 8);
+    for (let i = 0; i < 8; i++) fb.fillRect(0, y0 + i * 8, Math.ceil(fb.width * Math.min(1, progress * 1.4 - i * 0.05)), 8);
   }
   if (style === 'circle-out') {
     // Coarse radius steps keep the interior stable so XOR only stores the ring.
@@ -419,21 +427,22 @@ export function paintTransition(style, d, p, opts, fb) {
     const rand = mulberry32(opts.seed ?? 1);
     const n = Math.floor(progress * 12);
     for (let i = 0; i < n; i++) {
-      const x = Math.floor(rand() * 8) * 16, y = Math.floor(rand() * 4) * 16;
+      const x = Math.floor(rand() * 8) * 16, y = y0 + Math.floor(rand() * 4) * 16;
       fb.fillRect(x, y, 16, 16);
     }
   }
   if (style === 'fade-center') {
-    const r = (1 - progress) * 70; d.circle(64, 32, 80); if (r > 0) d.circle(64, 32, r, 0);
+    const r = h < fb.height ? Math.round((1 - progress) * 7) * 5 : (1 - progress) * 70;
+    d.circle(64, 32, h < fb.height ? 36 : 80); if (r > 0) d.circle(64, 32, r, 0);
   }
   if (style === 'slide-up') {
     // Page-aligned rising bar (8px steps) stays XOR-friendly.
-    const h = Math.round(progress * 8) * 8;
-    if (h > 0) fb.fillRect(0, fb.height - h, fb.width, h);
+    const sh = Math.round(progress * 8) * 8;
+    if (sh > 0) fb.fillRect(0, y0 + h - sh, fb.width, sh);
   }
   if (style === 'dissolve') {
     const rand = mulberry32(opts.seed ?? 1);
     // Stable 8x8 tiles instead of flashing single-pixel noise.
-    for (let y = 0; y < fb.height; y += 8) for (let x = 0; x < fb.width; x += 8) if (rand() < progress) fb.fillRect(x, y, 8, 8);
+    for (let y = y0; y < y0 + h; y += 8) for (let x = 0; x < fb.width; x += 8) if (rand() < progress) fb.fillRect(x, y, 8, 8);
   }
 }

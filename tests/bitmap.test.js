@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createFramebuffer, getPixel } from '../src/core/framebuffer.js';
-import { buildBitmapHeader, packBitmap } from '../src/core/mcu.js';
+import { buildBitmapHeader, buildRGB565Header, packBitmap, packRGB565, rgb565 } from '../src/core/mcu.js';
 import { playerSource } from '../src/core/mcu-player.js';
 import { sampleEffect } from '../tools/sequence.mjs';
 import { exportMCU } from '../tools/export-mcu.mjs';
@@ -34,6 +34,23 @@ test('both bitmap formats preserve every sampled pixel on both SSD1306 profiles'
   }
   assert.throws(() => buildBitmapHeader(sampleEffect(), 'bad-name'));
   assert.throws(() => buildBitmapHeader(sampleEffect(), 'valid', 'unknown'));
+});
+
+test('RGB565 packing and header export match 16-bit HUB75 and ST7789 frame sizes', () => {
+  assert.equal(rgb565(255, 255, 255), 0xffff);
+  assert.equal(rgb565(0, 0, 0), 0x0000);
+  for (const [profile, expectedFrameBytes] of [['led-matrix-64x32', 4096], ['st7789-128x128', 32768]]) {
+    const sequence = sampleEffect({ fx: 'eyes/blink', profile, frames: 4, fps: 8 });
+    const { header, data, storageBytes } = buildRGB565Header(sequence, 'tft_anim', { dualTone: true });
+    assert.equal(data.length, sequence.frames.length * sequence.width * sequence.height);
+    assert.equal(storageBytes, sequence.frames.length * expectedFrameBytes);
+    assert.match(header, new RegExp(`#define TFT_ANIM_FRAME_BYTES ${expectedFrameBytes}`));
+    assert.match(header, /static const uint16_t tft_anim_data\[\] PROGMEM/);
+    const words = packRGB565(sequence.frames[0], sequence.width, sequence.height);
+    for (let y = 0; y < sequence.height; y++) for (let x = 0; x < sequence.width; x++) {
+      assert.equal(words[y * sequence.width + x] !== 0, getPixel({ ...sequence, data: sequence.frames[0] }, x, y) === 1);
+    }
+  }
 });
 
 test('CLI exports Mode B independently, positional FX ID accepted, invalid formats rejected', async () => {

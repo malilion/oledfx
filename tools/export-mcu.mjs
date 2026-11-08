@@ -1,12 +1,14 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildHeader, buildBitmapHeader, decoderSource } from './mcu-format.mjs';
+import { buildHeader, buildBitmapHeader, buildRGB565Header, decoderSource } from './mcu-format.mjs';
 import { isMain, loadSequence, parseArgs } from './sequence.mjs';
 
-export async function exportMCU(sequence, { out = 'artifacts/eyes.h', symbol = 'oledfx_animation', format = 'xor-rle', decoderPath = fileURLToPath(new URL('../firmware/ssd1306_xor_rle_decoder.c', import.meta.url)) } = {}) {
-  if (!['xor-rle', 'u8g2', 'adafruit'].includes(format)) throw new RangeError(`Unknown format: ${format}`);
-  const result = format === 'xor-rle' ? buildHeader(sequence, symbol) : buildBitmapHeader(sequence, symbol, format);
+export async function exportMCU(sequence, { out = 'artifacts/eyes.h', symbol = 'oledfx_animation', format = 'xor-rle', dualTone = false, decoderPath = fileURLToPath(new URL('../firmware/ssd1306_xor_rle_decoder.c', import.meta.url)) } = {}) {
+  if (!['xor-rle', 'u8g2', 'adafruit', 'rgb565'].includes(format)) throw new RangeError(`Unknown format: ${format}`);
+  const result = format === 'xor-rle' ? buildHeader(sequence, symbol)
+    : format === 'rgb565' ? buildRGB565Header(sequence, symbol, { dualTone })
+    : buildBitmapHeader(sequence, symbol, format);
   if (resolve(out) === resolve(decoderPath)) throw new Error('Header and decoder paths must differ');
   const playerPath = resolve(dirname(out), 'oledfx_player.h');
   if (format === 'xor-rle' && (resolve(out) === playerPath || resolve(decoderPath) === playerPath)) throw new Error('Output paths collide with oledfx_player.h');
