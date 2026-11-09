@@ -86,6 +86,14 @@ export const { meta, draw, create } = defineEffect(
 export async function createEffectFile({ id, out, loop = true, sim = false, eyes, force = false } = {}) {
   const parsed = validateEffectId(id);
   const root = fileURLToPath(new URL('../', import.meta.url));
+  if (out && typeof out === 'string') {
+    if (out.includes('\0')) throw new Error('Path cannot contain null bytes');
+    const resolved = resolve(out);
+    const gitDir = resolve(root, '.git');
+    if (resolved === gitDir || resolved.startsWith(gitDir + '/')) {
+      throw new Error('Refusing to write into .git directory');
+    }
+  }
   const targetPath = resolve(out ?? `${root}/src/fx/${parsed.id}.js`);
   if (!force) {
     const exists = await access(targetPath).then(() => true, () => false);

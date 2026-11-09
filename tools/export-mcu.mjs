@@ -5,6 +5,18 @@ import { buildHeader, buildBitmapHeader, buildRGB565Header, decoderSource } from
 import { isMain, loadSequence, parseArgs } from './sequence.mjs';
 
 export async function exportMCU(sequence, { out = 'artifacts/eyes.h', symbol = 'oledfx_animation', format = 'xor-rle', dualTone = false, decoderPath = fileURLToPath(new URL('../firmware/ssd1306_xor_rle_decoder.c', import.meta.url)) } = {}) {
+  if (typeof symbol !== 'string' || !/^[A-Za-z][A-Za-z0-9_]*$/.test(symbol)) {
+    throw new Error('Symbol must be a C identifier beginning with a letter');
+  }
+  if (typeof out === 'string' && out.includes('\0')) throw new Error('Path cannot contain null bytes');
+  if (typeof decoderPath === 'string' && decoderPath.includes('\0')) throw new Error('Path cannot contain null bytes');
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const gitDir = resolve(root, '.git');
+  const resolvedOut = resolve(out);
+  const resolvedDecoder = resolve(decoderPath);
+  if (resolvedOut === gitDir || resolvedOut.startsWith(gitDir + '/') || resolvedDecoder === gitDir || resolvedDecoder.startsWith(gitDir + '/')) {
+    throw new Error('Refusing to write into .git directory');
+  }
   if (!['xor-rle', 'u8g2', 'adafruit', 'rgb565'].includes(format)) throw new RangeError(`Unknown format: ${format}`);
   const result = format === 'xor-rle' ? buildHeader(sequence, symbol)
     : format === 'rgb565' ? buildRGB565Header(sequence, symbol, { dualTone })
@@ -26,6 +38,9 @@ export async function exportMCU(sequence, { out = 'artifacts/eyes.h', symbol = '
 if (isMain(import.meta.url)) {
   try {
     const options = parseArgs(process.argv.slice(2), ['symbol', 'decoder', 'format', 'compress']);
+    if (options.symbol && !/^[A-Za-z][A-Za-z0-9_]*$/.test(options.symbol)) {
+      throw new Error('Symbol must be a C identifier beginning with a letter');
+    }
     if (options.compress && options.compress !== 'xor-rle') throw new Error('--compress supports xor-rle; use --format for bitmap exports');
     if (options.compress && options.format && options.format !== 'xor-rle') throw new Error('--compress xor-rle conflicts with the selected bitmap format');
     if (options.help) console.log('node tools/export-mcu.mjs [id | --fx id | --fixture frames.json] [--format xor-rle|u8g2|adafruit] [--profile ssd1306-128x64|ssd1306-128x32] [--frames 32 --fps 16 --seed 1] [--out artifacts/eyes.h --symbol oledfx_animation --decoder firmware/ssd1306_xor_rle_decoder.c]');

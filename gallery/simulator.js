@@ -12,9 +12,19 @@ let selectedId = 'eyes/blink', speed = 1, activeTab = 'header';
 let prevFrameData = new Uint8Array(fb.data.length);
 let cachedHeader = null;
 
+function escapeHTML(str) {
+  return String(str).replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag] || tag));
+}
+
 const effectIds = Object.keys(effects);
 const groups = [...new Set(effectIds.map(id => id.split('/')[0]))];
-$('#fx-picker').innerHTML = groups.map(category => `<optgroup label="${category}">${Object.values(effects).filter(fx => fx.meta.id.startsWith(category + '/')).map(fx => `<option value="${fx.meta.id}">${fx.meta.name}</option>`).join('')}</optgroup>`).join('');
+$('#fx-picker').innerHTML = groups.map(category => `<optgroup label="${escapeHTML(category)}">${Object.values(effects).filter(fx => fx.meta.id.startsWith(category + '/')).map(fx => `<option value="${escapeHTML(fx.meta.id)}">${escapeHTML(fx.meta.name)}</option>`).join('')}</optgroup>`).join('');
 $('#fx-count').textContent = `${effectIds.length} FX`;
 
 function popcountBuffer(buf) {

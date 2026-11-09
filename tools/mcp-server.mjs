@@ -61,9 +61,10 @@ export const mcpTools = Object.freeze([
 ]);
 
 export async function callMCPTool(name, args = {}) {
+  const safeArgs = (args && typeof args === 'object') ? args : {};
   if (name === 'fx_search_catalog') {
-    const q = String(args.query ?? '').trim().toLowerCase();
-    const cat = args.category ? String(args.category).trim().toLowerCase() : '';
+    const q = String(safeArgs.query ?? '').trim().toLowerCase();
+    const cat = safeArgs.category ? String(safeArgs.category).trim().toLowerCase() : '';
     const matches = catalog.filter(meta =>
       (!cat || meta.id.startsWith(`${cat}/`)) &&
       (!q || meta.id.toLowerCase().includes(q) || meta.name.toLowerCase().includes(q))
@@ -76,8 +77,8 @@ export async function callMCPTool(name, args = {}) {
     return { content: [{ type: 'text', text: JSON.stringify({ count: matches.length, matches }, null, 2) }] };
   }
   if (name === 'fx_render_contact_sheet') {
-    const sequence = sampleEffect({ fx: args.effect_id, profile: args.profile });
-    const dualTone = args.palette === 'dual-tone';
+    const sequence = sampleEffect({ fx: safeArgs.effect_id, profile: safeArgs.profile });
+    const dualTone = safeArgs.palette === 'dual-tone';
     const sheet = contactSheet(sequence, { scale: 3, columns: 4, samples: 12, dualTone });
     const png = encodePNG({ w: sheet.width, h: sheet.height, data: sheet.data });
     return {
@@ -88,12 +89,12 @@ export async function callMCPTool(name, args = {}) {
     };
   }
   if (name === 'fx_run_diagnostics') {
-    const report = await checkSequence(() => sampleEffect({ fx: args.effect_id, profile: args.profile }));
+    const report = await checkSequence(() => sampleEffect({ fx: safeArgs.effect_id, profile: safeArgs.profile }));
     return { content: [{ type: 'text', text: JSON.stringify(report, null, 2) }] };
   }
   if (name === 'fx_export_asset') {
-    const sequence = sampleEffect({ fx: args.effect_id, profile: args.profile });
-    const fmt = args.target_format ?? 'xor-rle';
+    const sequence = sampleEffect({ fx: safeArgs.effect_id, profile: safeArgs.profile });
+    const fmt = safeArgs.target_format ?? 'xor-rle';
     if (fmt === 'sprite-sheet') {
       const { image, atlas } = spriteSheet(sequence);
       const png = encodePNG({ w: image.width, h: image.height, data: image.data });
@@ -131,7 +132,16 @@ if (isMain(import.meta.url)) {
   const rl = createInterface({ input: process.stdin, terminal: false });
   rl.on('line', async line => {
     if (!line.trim()) return;
-    const res = await handleMCPRequest(JSON.parse(line));
-    if (res) process.stdout.write(JSON.stringify(res) + '\n');
+    try {
+      const parsed = JSON.parse(line);
+      const res = await handleMCPRequest(parsed);
+      if (res) process.stdout.write(JSON.stringify(res) + '\n');
+    } catch (err) {
+      process.stdout.write(JSON.stringify({
+        jsonrpc: '2.0',
+        id: null,
+        error: { code: -32700, message: `Parse error: ${err.message}` }
+      }) + '\n');
+    }
   });
 }
