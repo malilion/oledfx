@@ -1,0 +1,14 @@
+{
+  "name": "oledfx",
+  "version": "0.1.0",
+  "description": "Procedural 1-bit & RGB565 micro-display animations, visual self-check loop, and ESP32 C header compiler",
+  "skills": [
+    "skills/oledfx/SKILL.md"
+  ],
+  "mcpServers": {
+    "oledfx": {
+      "command": "node",
+      "args": ["tools/mcp-server.mjs"]
+    }
+  }
+}
