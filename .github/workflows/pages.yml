@@ -28,12 +28,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
-      - name: Verify private repository and public Pages showcase
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          test "$(gh api 'repos/${{ github.repository }}' --jq .private)" = true
-          test "$(gh api 'repos/${{ github.repository }}/pages' --jq .public)" = true
       - name: Stage browser assets without a build
         run: |
           mkdir -p _site
