@@ -1,10 +1,13 @@
 {
   "name": "oledfx",
   "version": "0.1.0",
+  "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "description": "Procedural 1-bit OLED animation and SSD1306 XOR-RLE export",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "node --test",
     "new": "node tools/new.mjs",

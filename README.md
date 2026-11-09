@@ -22,6 +22,7 @@
   <img src="https://img.shields.io/badge/Flash_Budget-%3C_4_KiB-ff6b2b?style=flat-square" alt="< 4 KiB">
   <img src="https://img.shields.io/badge/Hardware_Profiles-1--bit_%26_RGB565-4bc3ff?style=flat-square" alt="Hardware Profiles">
   <img src="https://img.shields.io/badge/Architecture-Pure_ESM_%26_C99-a855f7?style=flat-square" alt="Architecture">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
 </p>
 
 ---
@@ -141,6 +142,14 @@ void loop() {
 ```
 
 ---
+
+---
+
+## License
+
+Copyright 2026 Malilion.
+
+Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE) for attribution.
 
 <p align="center">
   <sub>oledfx &copy; Designed for soulful micro-hardware. Crafted with precision.</sub><br>

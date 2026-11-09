@@ -22,6 +22,7 @@
   <img src="https://img.shields.io/badge/Flash預算-%3C%204%20KiB-ff6b2b?style=flat-square" alt="< 4 KiB">
   <img src="https://img.shields.io/badge/硬體設定檔-1--bit%20%26%20RGB565-4bc3ff?style=flat-square" alt="硬體支援">
   <img src="https://img.shields.io/badge/架構-Pure%20ESM%20%26%20C99-a855f7?style=flat-square" alt="架構">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
 </p>
 
 ---
@@ -141,6 +142,14 @@ void loop() {
 ```
 
 ---
+
+---
+
+## 授權（License）
+
+Copyright 2026 Malilion。
+
+以 [Apache License, Version 2.0](LICENSE) 授權。歸屬說明見 [NOTICE](NOTICE)。
 
 <p align="center">
   <sub>oledfx &copy; Designed for soulful micro-hardware. Crafted with precision.</sub><br>
