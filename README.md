@@ -94,3 +94,8 @@ Full sketches for U8g2 and Adafruit SSD1306 are in [firmware/examples](firmware/
 ## License
 
 Copyright 2026 Malilion. Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE).
+
+---
+
+<!-- malilion-ecosystem-footer -->
+<p align="center"><sub>🦁 Part of the <a href="https://github.com/malilion">MaliLion</a> ecosystem · <a href="https://malilion.com">malilion.com</a> · <a href="https://github.com/malilion?tab=repositories">More projects</a></sub></p>

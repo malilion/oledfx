@@ -94,3 +94,8 @@ U8g2 與 Adafruit SSD1306 的完整範例在 [firmware/examples](firmware/exampl
 ## 授權
 
 Copyright 2026 Malilion。採用 [Apache License 2.0](LICENSE) 授權，詳見 [NOTICE](NOTICE)。
+
+---
+
+<!-- malilion-ecosystem-footer -->
+<p align="center"><sub>🦁 碼力獅 <a href="https://github.com/malilion">MaliLion</a> 生態系的一員 · <a href="https://malilion.com">malilion.com</a> · <a href="https://github.com/malilion?tab=repositories">更多作品</a></sub></p>
